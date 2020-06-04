@@ -46,6 +46,12 @@ void serveScriptFile()
   }
 }
 
+void listFiles() {
+
+// alguma coisa a ver o com o método openNextFile() do objeto File
+
+}
+
 void setup(){
 
   pinMode(pin_led, OUTPUT);

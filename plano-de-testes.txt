@@ -1,0 +1,3 @@
+30/05/2020
+-Pesquisar forma de alterar vários elementos da página HTML de uma vez, para simular a geração da lista de arquivos disponíveis para baixar
+-Testar inclusão da tag <a></a> nos botões da página
