@@ -24,6 +24,7 @@ void serveIndexFile()
   }
 }
 
+/*
 void serveStyleFile()
 {
   File file = SPIFFS.open("/style.css", "r");
@@ -34,6 +35,7 @@ void serveStyleFile()
     file.close();
   }
 }
+*/
 
 void serveScriptFile()
 {
@@ -48,7 +50,20 @@ void serveScriptFile()
 
 void listFiles() {
 
-// alguma coisa a ver o com o método openNextFile() do objeto File
+File dir = SPIFFS.open("/");
+File file = dir.openNextFile();
+String list = "";
+
+while (file) {
+  list += file.name();
+  list += "|";
+  file = dir.openNextFile();
+}
+
+Serial.println(list);
+dir.close();
+file.close();
+server.send(200, "text/plain", list);
 
 }
 
@@ -81,13 +96,16 @@ void setup(){
   MDNS.addService("http", "tcp", 80);
   
   server.on("/", serveIndexFile);
-  server.on("/style.css", serveStyleFile);
+  delay(200);
+  // server.on("/style.css", serveStyleFile);
+  // delay(200);
   server.on("/script.js", serveScriptFile);
+  server.on("/listFiles", listFiles);
   server.begin();
 
 }
 
-void loop(void)
+void loop(void) 
 {
 server.handleClient();
 }
