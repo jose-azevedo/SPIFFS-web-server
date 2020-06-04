@@ -1,2 +1,2 @@
 # SPIFFS-web-server
- Servidor do GEDAE
+ Servidor web criado para armazenar dados de geração fotovoltaica do Grupo de Estudos e Desenvolvimento de Alternativas Energéticas (GEDAE). O servidor é fornecido por um microcontrolador esp32 o qual tem os arquivos de da página web armazenados na memória flash a partir do SPIFFS.
