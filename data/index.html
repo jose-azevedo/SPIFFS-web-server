@@ -7,8 +7,7 @@
   <script src="script.js"></script>
 
   <style>
-
-body {
+    body {
   font-family: 'Noto Serif', serif;
   color: white;
   margin: 0;
@@ -82,9 +81,9 @@ li {
 table {
   margin: auto;
 }
-
   </style>
-   <!-- problemas ao carregar arquivo .css externo  <link rel="stylesheet" type="text/css" href="style.css">     -->
+
+  <!-- <link rel="stylesheet" type="text/css" href="style.css"> -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif&display=swap" rel="stylesheet">
 
   <title>GEDAE</title>
@@ -118,53 +117,20 @@ table {
         </ul>
 
         <table>
-          <tr>
-            <th rowspan="2"></th>
-            <th colspan="4">Gerador</th>
-          </tr>
-          <tr>
-            <th>A</th>
-            <th>B</th>
-            <th>C</th>
-            <th>D</th>
-          </tr>
-          <tr>
-            <th rowspan="10">Data</th>
-            <td class="cellA">exemplo</td>
-            <td class="cellB">exemplo</td>
-            <td class="cellC">exemplo</td>
-            <td class="cellD">exemplo</td>
-          </tr>
-          <tr>
-            <td class="cellA">exemplo</td>
-            <td class="cellB">exemplo</td>
-            <td class="cellC">exemplo</td>
-            <td class="cellD">exemplo</td>
-          </tr>
-          <tr>
-            <td class="cellA">exemplo</td>
-            <td class="cellB">exemplo</td>
-            <td class="cellC">exemplo</td>
-            <td class="cellD">exemplo</td>
-          </tr>
-          <tr>
-            <td class="cellA">exemplo</td>
-            <td class="cellB">exemplo</td>
-            <td class="cellC">exemplo</td>
-            <td class="cellD">exemplo</td>
-          </tr>
-          <tr>
-            <td class="cellA">exemplo</td>
-            <td class="cellB">exemplo</td>
-            <td class="cellC">exemplo</td>
-            <td class="cellD">exemplo</td>
-          </tr>
-          <tr>
-            <td class="cellA">exemplo</td>
-            <td class="cellB">exemplo</td>
-            <td class="cellC">exemplo</td>
-            <td class="cellD">exemplo</td>
-          </tr>
+          <thead>
+            <tr>
+              <th colspan="4">Gerador</th>
+            </tr>
+            <tr>
+              <th>A</th>
+              <th>B</th>
+              <th>C</th>
+              <th>D</th>
+            </tr>
+          </thead>
+          <tbody id="tabela">
+            <!--Células com arquivos criadas dinamicamente aqui-->
+          </tbody>
         </table>
       </div>
   </div>

@@ -24,7 +24,7 @@ void serveIndexFile()
   }
 }
 
-/*
+
 void serveStyleFile()
 {
   File file = SPIFFS.open("/style.css", "r");
@@ -35,7 +35,7 @@ void serveStyleFile()
     file.close();
   }
 }
-*/
+
 
 void serveScriptFile()
 {
@@ -44,6 +44,17 @@ void serveScriptFile()
   {
     Serial.println("Serving script.js");
     server.streamFile(file, "text/javascript");
+    file.close();
+  }
+}
+
+void serveLogo()
+{
+  File file = SPIFFS.open("/gedae.png", "r");
+  if(file)
+  {
+    Serial.println("Serving gedae.png");
+    server.streamFile(file, "image/png");
     file.close();
   }
 }
@@ -97,9 +108,11 @@ void setup(){
   
   server.on("/", serveIndexFile);
   delay(200);
-  // server.on("/style.css", serveStyleFile);
-  // delay(200);
   server.on("/script.js", serveScriptFile);
+  delay(200);
+  server.on("/style.css", serveStyleFile);
+  delay(200);
+  server.on("/gedae.png", serveLogo);
   server.on("/listFiles", listFiles);
   server.begin();
 
