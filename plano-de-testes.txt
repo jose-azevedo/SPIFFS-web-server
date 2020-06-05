@@ -1,3 +1,8 @@
 30/05/2020
 -Pesquisar forma de alterar vários elementos da página HTML de uma vez, para simular a geração da lista de arquivos disponíveis para baixar [FEITO]
--Testar inclusão da tag <a></a> nos botões da página
+-Testar inclusão da tag <a></a> nos botões da página [FEITO]
+
+05/06/2020
+-Fazer transição para a AsynWebServer
+-Habilitar download
+-Otimizar logo para web
