@@ -1,5 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300&display=swap');
+
 body {
-  font-family: 'Noto Serif', serif;
+  font-family: 'Noto Sans JP', sans-serif;
   color: white;
   margin: 0;
   padding: 0;
@@ -10,21 +14,16 @@ body {
   padding-bottom: 50px;
 }
 
-.container {
-  max-width: 1140px;
-  margin-left: auto;
-  margin-right: auto;
-}
 #logo {
-  float: left;
+  position: absolute;
   height: 100px;
   width: auto;
-  margin: 0;
+  top: 35px;
+  left: 50px;
   }
 
-  header h1 {
-  color: white;
-  padding-right: 57px;
+header h1 {
+  font-family: 'Noto Serif', serif;
   text-align: center;
   margin-left: auto;
   margin-right: auto;
@@ -35,7 +34,7 @@ body {
   padding: 0;
   min-height: 400px;
   background-color: rgb(241, 110, 58);
-  padding-top: 30px;
+  padding: 50px;
 }
 
 #section-2 p {
@@ -43,32 +42,47 @@ body {
   margin-bottom: 50px;
 }
 
-.container-2 {
-  max-width: 1230px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-
-
-ul {
+nav#menu ul {
+  list-style: none;
   float: left;
-  text-decoration: none;
-  list-style-type: none;
   margin: 0;
   padding: 0;
   }
 
-li {
+nav#menu li {
   color: white;
   background-color: rgb(99, 37, 78);
   display: block;
   text-align: center;
-  width: 200px;
-  margin-bottom: 3px;
-  border-radius: 5px;
+  padding: 10px 10px 10px 10px;
+  margin-bottom: 5px;
+  border-radius: 3px;
+  cursor: pointer;
 }
 
-table {
+nav#menu li:hover {
+  background-color: rgb(63, 26, 51);
+}
+
+#tabela {
+  border: 2px solid rgb(99, 37, 78);
+  border-radius: 2px;
+  border-spacing: 0px;
   margin: auto;
+}
+
+#tabela th{
+  border: 1px solid rgb(99, 37, 78);
+  padding: 6px 80px;
+  cursor: context-menu;
+}
+
+#tabela td{
+  border: 1px solid rgb(99, 37, 78);
+  padding: 8px 80px;
+  cursor: pointer;
+}
+
+#tabela td:hover {
+  text-decoration: underline;
 }

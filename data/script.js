@@ -5,11 +5,7 @@ xml = new XMLHttpRequest();
 xml.open('GET', 'listFiles', true);
 xml.onreadystatechange = function () {
   if ((xml.readyState==4) && (xml.status==200)){
-    var tab = document.getElementById('tabela')
-    var alvoA = document.getElementsByClassName('cellA')
-    var alvoB = document.getElementsByClassName('cellB')
-    var alvoC = document.getElementsByClassName('cellC')
-    var alvoD = document.getElementsByClassName('cellD')
+    var tab = document.getElementById('dataCells')
     var listString;
     listString = xml.responseText;
     
@@ -20,37 +16,25 @@ xml.onreadystatechange = function () {
       tab.appendChild(newRow)
 
       var newCellA = document.createElement('td')
-      newCellA.setAttribute('class', 'CellA')
+      newCellA.setAttribute('class', 'cellA')
       newRow.appendChild(newCellA)
-      document.getElementsByClassName('CellA')[i].innerHTML = dataList.A[i]
+      document.getElementsByClassName('cellA')[i].innerHTML = dataList.A[i]
       
       var newCellB = document.createElement('td')
-      newCellB.setAttribute('class', 'CellB')
+      newCellB.setAttribute('class', 'cellB')
       newRow.appendChild(newCellB)
-      document.getElementsByClassName('CellB')[i].innerHTML = dataList.B[i]
+      document.getElementsByClassName('cellB')[i].innerHTML = dataList.B[i]
       
       var newCellC = document.createElement('td')
-      newCellC.setAttribute('class', 'CellC')
+      newCellC.setAttribute('class', 'cellC')
       newRow.appendChild(newCellC)
-      document.getElementsByClassName('CellC')[i].innerHTML = dataList.C[i]
+      document.getElementsByClassName('cellC')[i].innerHTML = dataList.C[i]
       
       var newCellD = document.createElement('td')
-      newCellD.setAttribute('class', 'CellD')
+      newCellD.setAttribute('class', 'cellD')
       newRow.appendChild(newCellD)
-      document.getElementsByClassName('CellD')[i].innerHTML = dataList.D[i]
-      
-      
-      /*
-      alvoA[i].innerHTML = dataList.A[i]
-      alvoB[i].innerHTML = dataList.B[i]
-      alvoC[i].innerHTML = dataList.C[i]
-      alvoD[i].innerHTML = dataList.D[i]
-      */
+      document.getElementsByClassName('cellD')[i].innerHTML = dataList.D[i]
     }
-
-
-
-
   }
 }
 xml.send();
