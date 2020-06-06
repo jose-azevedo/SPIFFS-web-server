@@ -75,3 +75,11 @@ function mkList (stringList) {
     D: dataListD
   }
 }
+
+function download(){
+  console.log('função chamada')
+  var xml
+  xml = new XMLHttpRequest()
+  xml.open('POST', 'download', true)
+  xml.send()
+}

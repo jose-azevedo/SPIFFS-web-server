@@ -71,11 +71,25 @@ while (file) {
   file = dir.openNextFile();
 }
 
-Serial.println(list);
+Serial.println("Lista enviada");
 dir.close();
 file.close();
 server.send(200, "text/plain", list);
 
+}
+
+void download() {
+  Serial.println("função de download chamada");
+  File download = SPIFFS.open("/A02-05-2020.txt", "r");
+  if (download) {
+    Serial.println("File opened okay! c:");
+    server.sendHeader("Content-Type", "text/text");
+    server.sendHeader("Content-Disposition", "attachment; filename=A02-05-2020" );
+    server.sendHeader("Connection", "close");
+    server.streamFile(download, "application/octet-stream");
+    download.close();
+  } 
+  
 }
 
 void setup(){
@@ -114,6 +128,7 @@ void setup(){
   delay(200);
   server.on("/gedae.png", serveLogo);
   server.on("/listFiles", listFiles);
+  server.on("/download", download);
   server.begin();
 
 }

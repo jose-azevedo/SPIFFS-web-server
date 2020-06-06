@@ -125,11 +125,16 @@ nav#menu li:hover {
     <nav id="menu">
       <ul>
         <li onclick="listar()">Listar arquivos</li>
-        <li>Baixar medição</li>
+        <li onclick="download()">Baixar medição</li>
         <li>Dados instantâneos</li>
       </ul>
     </nav>
 
+    <form action="/download" method="post" target="_blank">
+      <input type="text" name="filename" id="filenameid">
+      <input type="submit" value="Enviar">
+    </form>
+    
     <table id="tabela">
       <thead>
         <tr>
