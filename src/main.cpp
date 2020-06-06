@@ -79,15 +79,13 @@ server.send(200, "text/plain", list);
 }
 
 void download() {
-  Serial.println("função de download chamada");
-  File download = SPIFFS.open("/A02-05-2020.txt", "r");
-  if (download) {
-    Serial.println("File opened okay! c:");
-    server.sendHeader("Content-Type", "text/text");
-    server.sendHeader("Content-Disposition", "attachment; filename=A02-05-2020" );
+  
+  File file = SPIFFS.open("/dados/" + server.arg(0), "r");
+  if (file) {
+    server.sendHeader("Content-Disposition", "attachment; filename=" + server.arg(0));
     server.sendHeader("Connection", "close");
-    server.streamFile(download, "application/octet-stream");
-    download.close();
+    server.streamFile(file, "text/text");
+    file.close();
   } 
   
 }

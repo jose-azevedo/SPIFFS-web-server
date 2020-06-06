@@ -46,15 +46,15 @@ header h1 {
   padding: 50px;
 }
 
-#section-2 p {
+/*#section-2 p {
   margin-top: 0;
-  margin-bottom: 50px;
-}
+  margin-bottom: 30px;
+}*/
 
 nav#menu ul {
   list-style: none;
   float: left;
-  margin: 0;
+  margin-top: 20px;
   padding: 0;
   }
 
@@ -71,6 +71,10 @@ nav#menu li {
 
 nav#menu li:hover {
   background-color: rgb(63, 26, 51);
+}
+
+form {
+  display: none;
 }
 
 #tabela {
@@ -125,14 +129,14 @@ nav#menu li:hover {
     <nav id="menu">
       <ul>
         <li onclick="listar()">Listar arquivos</li>
-        <li onclick="download()">Baixar medição</li>
+        <li>Baixar medição</li>
         <li>Dados instantâneos</li>
       </ul>
     </nav>
 
     <form action="/download" method="post" target="_blank">
-      <input type="text" name="filename" id="filenameid">
-      <input type="submit" value="Enviar">
+      <input type="text" name="filename" id="filename" value="">
+      <input type="submit" value="Enviar" id="submit">
     </form>
     
     <table id="tabela">
@@ -147,7 +151,7 @@ nav#menu li:hover {
           <th>D</th>
         </tr>
       </thead>
-      <tbody id="dataCells">
+      <tbody id="dataCells" onclick="submit()">
         <!--Células com arquivos criadas dinamicamente aqui-->
       </tbody>
     </table>

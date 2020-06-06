@@ -4,5 +4,5 @@
 
 05/06/2020
 -Fazer transição para a AsynWebServer
--Habilitar download
+-Habilitar download [FEITO]
 -Otimizar logo para web

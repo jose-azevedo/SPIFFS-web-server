@@ -19,21 +19,25 @@ xml.onreadystatechange = function () {
       newCellA.setAttribute('class', 'cellA')
       newRow.appendChild(newCellA)
       document.getElementsByClassName('cellA')[i].innerHTML = dataList.A[i]
-      
+      newCellA.setAttribute('onclick', 'document.getElementById("filename").setAttribute("value", this.innerText)')
+
       var newCellB = document.createElement('td')
       newCellB.setAttribute('class', 'cellB')
       newRow.appendChild(newCellB)
       document.getElementsByClassName('cellB')[i].innerHTML = dataList.B[i]
+      newCellB.setAttribute('onclick', 'document.getElementById("filename").setAttribute("value", this.innerText)')
       
       var newCellC = document.createElement('td')
       newCellC.setAttribute('class', 'cellC')
       newRow.appendChild(newCellC)
       document.getElementsByClassName('cellC')[i].innerHTML = dataList.C[i]
+      newCellC.setAttribute('onclick', 'document.getElementById("filename").setAttribute("value", this.innerText)')
       
       var newCellD = document.createElement('td')
       newCellD.setAttribute('class', 'cellD')
       newRow.appendChild(newCellD)
       document.getElementsByClassName('cellD')[i].innerHTML = dataList.D[i]
+      newCellD.setAttribute('onclick', 'document.getElementById("filename").setAttribute("value", this.innerText)')
     }
   }
 }
@@ -76,10 +80,6 @@ function mkList (stringList) {
   }
 }
 
-function download(){
-  console.log('função chamada')
-  var xml
-  xml = new XMLHttpRequest()
-  xml.open('POST', 'download', true)
-  xml.send()
+function submit() {
+  document.getElementById('submit').click()
 }
