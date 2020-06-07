@@ -45,6 +45,31 @@ void setup(){
   server.on("/script.js", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(SPIFFS, "/script.js", "text/javascript");});
   server.on("/gedae.png", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(SPIFFS, "/gedae.png", "image/png");});
 
+  server.on("/listFiles", HTTP_GET, [](AsyncWebServerRequest *request) {
+    File dir = SPIFFS.open("/");
+    File file = dir.openNextFile();
+    String list = "";
+
+    while (file) {
+      list += file.name();
+      list += "|";
+      file = dir.openNextFile();
+    }
+
+    Serial.println("Lista enviada");
+    dir.close();
+    file.close();
+    request->send(200, "text/plain", list);
+    });
+
+  server.on("/download", HTTP_POST, [](AsyncWebServerRequest *request) {
+    String fname = "/dados/";
+    fname += request->arg("filename");
+    Serial.print("Download requisitado: ");
+    Serial.println(fname);
+    request->send(SPIFFS, fname, "text/text", true);
+    });  
+
   server.begin();
 
 }
