@@ -9,7 +9,6 @@ WebServer server;
 
 int i = 0;
 
-uint8_t pin_led = 5;
 const char* ssid = "Azevedo";
 const char* password = "familiaea";
 
@@ -60,7 +59,6 @@ void serveLogo()
 }
 
 void listFiles() {
-
 File dir = SPIFFS.open("/");
 File file = dir.openNextFile();
 String list = "";
@@ -75,11 +73,9 @@ Serial.println("Lista enviada");
 dir.close();
 file.close();
 server.send(200, "text/plain", list);
-
 }
 
 void download() {
-  
   File file = SPIFFS.open("/dados/" + server.arg(0), "r");
   if (file) {
     server.sendHeader("Content-Disposition", "attachment; filename=" + server.arg(0));
@@ -87,12 +83,10 @@ void download() {
     server.streamFile(file, "text/text");
     file.close();
   } 
-  
 }
 
 void setup(){
 
-  pinMode(pin_led, OUTPUT);
   WiFi.begin(ssid,password);
   Serial.begin(115200);
   if (SPIFFS.begin()){
@@ -119,11 +113,8 @@ void setup(){
   MDNS.addService("http", "tcp", 80);
   
   server.on("/", serveIndexFile);
-  delay(200);
   server.on("/script.js", serveScriptFile);
-  delay(200);
   server.on("/style.css", serveStyleFile);
-  delay(200);
   server.on("/gedae.png", serveLogo);
   server.on("/listFiles", listFiles);
   server.on("/download", download);

@@ -6,7 +6,7 @@
 
   <script src="script.js"></script>
 
-  <style>
+  <!--<style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Serif&display=swap');
 
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300&display=swap');
@@ -18,7 +18,7 @@ body {
   padding: 0;
 }
 #section-1 {
-  background-color: rgb(99, 37, 78);
+  background-color: #79291F;
   padding-top: 50px;
   padding-bottom: 50px;
 }
@@ -42,25 +42,25 @@ header h1 {
   margin: 0;
   padding: 0;
   min-height: 400px;
-  background-color: rgb(241, 110, 58);
-  padding: 50px;
+  background-color: #F39941;
+  padding: 30px 5%;
 }
 
-/*#section-2 p {
+#section-2 p {
   margin-top: 0;
   margin-bottom: 30px;
-}*/
+}
 
 nav#menu ul {
   list-style: none;
   float: left;
-  margin-top: 20px;
   padding: 0;
+  margin: 0px;
   }
 
 nav#menu li {
   color: white;
-  background-color: rgb(99, 37, 78);
+  background-color: #B67331;
   display: block;
   text-align: center;
   padding: 10px 10px 10px 10px;
@@ -70,7 +70,7 @@ nav#menu li {
 }
 
 nav#menu li:hover {
-  background-color: rgb(63, 26, 51);
+  background-color: #79291F;
 }
 
 form {
@@ -78,16 +78,17 @@ form {
 }
 
 #tabela {
-  border: 2px solid rgb(99, 37, 78);
+  border: 2px solid #B67331;
   border-radius: 2px;
   border-spacing: 0px;
   margin: auto;
+  
 }
 
 #tabela th{
   width: 150px;
   padding: 8px 15px;
-  border: 1px solid rgb(99, 37, 78);
+  border: 1px solid #B67331;
   cursor: context-menu;
 }
 
@@ -95,16 +96,17 @@ form {
   width: 150px;
   padding: 8px 15px;
   text-align: center;
-  border: 1px solid rgb(99, 37, 78);
+  border: 1px solid #B67331;
   cursor: pointer;
 }
 
 #tabela td:hover {
+  color: #79291F;
   text-decoration: underline;
 }
-  </style>
+  </style>-->
 
-  <!--<link rel="stylesheet" type="text/css" href="style.css">-->
+  <link rel="stylesheet" type="text/css" href="style.css">
 
   <title>GEDAE</title>
 
@@ -123,39 +125,37 @@ form {
 
 <section id="section-2">
 
-  <p>Página de teste do servidor de monitoração dos sistemas fotovoltaicos do GEDAE.</p>  
+  <p>Bem vindo ao servidor de monitoração dos sistemas fotovoltaicos do GEDAE. Para acessar as últimas medições realizadas clique em "Listar aquivos"</p>  
 
-  <div class="data-section">
-    <nav id="menu">
-      <ul>
-        <li onclick="listar()">Listar arquivos</li>
-        <li>Baixar medição</li>
-        <li>Dados instantâneos</li>
-      </ul>
-    </nav>
 
-    <form action="/download" method="post" target="_blank">
-      <input type="text" name="filename" id="filename" value="">
-      <input type="submit" value="Enviar" id="submit">
-    </form>
-    
-    <table id="tabela">
-      <thead>
-        <tr>
-          <th colspan="4">Gerador</th>
-        </tr>
-        <tr>
-          <th>A</th>
-          <th>B</th>
-          <th>C</th>
-          <th>D</th>
-        </tr>
-      </thead>
-      <tbody id="dataCells" onclick="submit()">
-        <!--Células com arquivos criadas dinamicamente aqui-->
-      </tbody>
-    </table>
-  </div>
+  <nav id="menu">
+    <ul>
+      <li onclick="listar()">Listar arquivos</li>
+    </ul>
+  </nav>
+
+  <form action="/download" method="post" target="_blank">
+    <input type="text" name="filename" id="filename" value="">
+    <input type="submit" value="Enviar" id="submit">
+  </form>
+  
+  <table id="tabela">
+    <thead>
+      <tr>
+        <th colspan="4">Gerador</th>
+      </tr>
+      <tr>
+        <th>A</th>
+        <th>B</th>
+        <th>C</th>
+        <th>D</th>
+      </tr>
+    </thead>
+    <tbody id="dataCells" onclick="submit()">
+      <!--Células com arquivos criadas dinamicamente aqui-->
+    </tbody>
+  </table>
+
   
 </section>
 

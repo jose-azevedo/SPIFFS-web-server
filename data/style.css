@@ -9,7 +9,7 @@ body {
   padding: 0;
 }
 #section-1 {
-  background-color: rgb(99, 37, 78);
+  background-color: #79291F;
   padding-top: 50px;
   padding-bottom: 50px;
 }
@@ -33,25 +33,25 @@ header h1 {
   margin: 0;
   padding: 0;
   min-height: 400px;
-  background-color: rgb(241, 110, 58);
-  padding: 50px;
+  background-color: #F39941;
+  padding: 30px 5%;
 }
 
 #section-2 p {
   margin-top: 0;
-  margin-bottom: 50px;
+  margin-bottom: 30px;
 }
 
 nav#menu ul {
   list-style: none;
   float: left;
-  margin: 0;
   padding: 0;
+  margin: 0px;
   }
 
 nav#menu li {
   color: white;
-  background-color: rgb(99, 37, 78);
+  background-color: #B67331;
   display: block;
   text-align: center;
   padding: 10px 10px 10px 10px;
@@ -61,28 +61,37 @@ nav#menu li {
 }
 
 nav#menu li:hover {
-  background-color: rgb(63, 26, 51);
+  background-color: #79291F;
+}
+
+form {
+  display: none;
 }
 
 #tabela {
-  border: 2px solid rgb(99, 37, 78);
+  border: 2px solid #B67331;
   border-radius: 2px;
   border-spacing: 0px;
   margin: auto;
+  
 }
 
 #tabela th{
-  border: 1px solid rgb(99, 37, 78);
-  padding: 6px 80px;
+  width: 150px;
+  padding: 8px 15px;
+  border: 1px solid #B67331;
   cursor: context-menu;
 }
 
 #tabela td{
-  border: 1px solid rgb(99, 37, 78);
-  padding: 8px 80px;
+  width: 150px;
+  padding: 8px 15px;
+  text-align: center;
+  border: 1px solid #B67331;
   cursor: pointer;
 }
 
 #tabela td:hover {
+  color: #79291F;
   text-decoration: underline;
 }
