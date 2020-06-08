@@ -3,6 +3,7 @@
 -Testar inclusão da tag <a></a> nos botões da página [FEITO]
 
 05/06/2020
--Fazer transição para a AsynWebServer
+-Fazer transição para a AsynWebServer [FEITO]
 -Habilitar download [FEITO]
--Otimizar logo para web
+-Otimizar logo para web [FEITO]
+-Testar método GET para download[FEITO] R: funciona mas aparecem mensagens estranhas no console, trocado para POST de volta
