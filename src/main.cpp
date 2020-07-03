@@ -14,7 +14,7 @@ AsyncWebServer server(80);
 
 bool saveFlag = false, endFlag = false, startFlag = false;
 char myChar;
-String lineBuffer = "", fileToSaveTo = "";
+String lineBuffer = "", fileToUpdate = "";
 File dayFile;
 int i = 0;
 
@@ -102,13 +102,13 @@ void loop(void) {
   while(Serial1.available() > 0){
   myChar = char(Serial1.read());
   if (myChar == '>') {
-    Serial.println(fileToSaveTo);
+    Serial.println(fileToUpdate);
     Serial.println(lineBuffer);
-    dayFile = SD.open("/dados/" + fileToSaveTo, "a");
+    dayFile = SD.open("/dados/" + fileToUpdate, "a");
     if(dayFile){
       dayFile.println(lineBuffer);
       dayFile.close();
-      Serial.print("Dados salvos!");
+      Serial.println("Dados salvos!");
     } else {
       Serial.print("Arquivo não abriu");
     }
@@ -117,7 +117,7 @@ void loop(void) {
     endFlag = true;
   } 
   else if (myChar == '|'){
-    fileToSaveTo =  lineBuffer;
+    fileToUpdate =  lineBuffer;
     lineBuffer = "";
   }
   else if (saveFlag) {

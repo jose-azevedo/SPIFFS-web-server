@@ -43,10 +43,10 @@ function listar() {
         document.getElementsByClassName('cellD')[i].innerHTML = dataList.D[i]
 
         // Define-se que ao clicar na célula o seu texto, nome do arquivo, seja copiado para a caixa de texto do elemento Formulário. É preciso que isso seja feito para comunicar ao servidor qual o nome do arquivo se deseja baixar quando o formulário for enviado.
-        newCellA.setAttribute('onclick', 'document.getElementById("filename").setAttribute("value", this.innerText)')
-        newCellB.setAttribute('onclick', 'document.getElementById("filename").setAttribute("value", this.innerText)')
-        newCellC.setAttribute('onclick', 'document.getElementById("filename").setAttribute("value", this.innerText)')
-        newCellD.setAttribute('onclick', 'document.getElementById("filename").setAttribute("value", this.innerText)')
+        newCellA.setAttribute('onclick', 'document.getElementById("filename").setAttribute("value", this.innerText); submit()')
+        newCellB.setAttribute('onclick', 'document.getElementById("filename").setAttribute("value", this.innerText); submit()')
+        newCellC.setAttribute('onclick', 'document.getElementById("filename").setAttribute("value", this.innerText); submit()')
+        newCellD.setAttribute('onclick', 'document.getElementById("filename").setAttribute("value", this.innerText); submit()')
       }
     }
   }

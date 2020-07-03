@@ -137,7 +137,7 @@ void loop()
     while ((UCSR1A & (1 << UDRE1)) == 0) {};
     UDR1 = '|';
     
-    String fileDataString = String(rtc.getTimeStr()) + " ; I DC ; I DC rms ; V DC ; V DC rms ; P DC ; I AC rms ; V AC rms ; S ; FP ";
+    String fileDataString = String(rtc.getTimeStr()) + " ; 5.43 ; 5.54 ; 26.7 ; 26.83 ; 144.98 ; 0.98 ; 222.4 ; 217.95 ; 1.0 ";
     char fileData[100] = {0};
     len = fileDataString.length();
     fileDataString.toCharArray(fileData, len+1);

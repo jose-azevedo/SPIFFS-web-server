@@ -7,3 +7,7 @@
 -Habilitar download [FEITO]
 -Otimizar logo para web [FEITO]
 -Testar método GET para download[FEITO] R: funciona mas aparecem mensagens estranhas no console, trocado para POST de volta
+
+03/07/2020
+-Mudar formato de data de D/M/YY para DD/MM/YY
+-Automatizar criação do cabeçalho no arquivo do ESP32
