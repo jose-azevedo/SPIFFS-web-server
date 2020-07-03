@@ -10,4 +10,4 @@
 
 03/07/2020
 -Mudar formato de data de D/M/YY para DD/MM/YY
--Automatizar criação do cabeçalho no arquivo do ESP32
+-Automatizar criação do cabeçalho no arquivo do ESP32 [FEITO]
