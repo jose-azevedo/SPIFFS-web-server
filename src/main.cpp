@@ -12,6 +12,10 @@
 
 AsyncWebServer server(80);
 
+bool saveFlag = false, endFlag = false, startFlag = false;
+char myChar;
+String lineBuffer = "", fileToSaveTo = "";
+File dayFile;
 int i = 0;
 
 // Credenciais da rede WiFi, nome da rede e senha
@@ -94,4 +98,53 @@ void setup(){
 
 }
 
-void loop(void) {}
+void loop(void) {
+  while(Serial1.available() > 0){
+  myChar = char(Serial1.read());
+  if (myChar == '>') {
+    Serial.println(fileToSaveTo);
+    Serial.println(lineBuffer);
+    dayFile = SD.open("/dados/" + fileToSaveTo, "a");
+    if(dayFile){
+      dayFile.println(lineBuffer);
+      dayFile.close();
+      Serial.print("Dados salvos!");
+    } else {
+      Serial.print("Arquivo não abriu");
+    }
+    lineBuffer = "";
+    saveFlag = false;
+    endFlag = true;
+  } 
+  else if (myChar == '|'){
+    fileToSaveTo =  lineBuffer;
+    lineBuffer = "";
+  }
+  else if (saveFlag) {
+    lineBuffer += myChar;
+    //Serial.print(myChar);
+  }  
+  else if (myChar == '<') {
+    saveFlag = true;
+  }
+}
+}
+
+/*
+  while(Serial1.available() > 0){
+  myChar = char(Serial1.read());
+  if (myChar == '>') {
+    newFile.close();
+    Serial.println("Arquivo escrito");
+    saveFlag = false;
+    endFlag = true;
+  }
+  else if (saveFlag) {
+    newFile.print(myChar);
+  }  
+  else if (myChar == '<') {
+    saveFlag = true;
+    newFile = SPIFFS.open(fname, "a");
+  }
+}
+*/
