@@ -9,5 +9,6 @@
 -Testar método GET para download[FEITO] R: funciona mas aparecem mensagens estranhas no console, trocado para POST de volta
 
 03/07/2020
--Mudar formato de data de D/M/YY para DD/MM/YY
+-Mudar formato de data de D/M/YY para DD/MM/YY [FEITO] OBS: A biblioteca utiliza o formato 8.3 pra nomear os arquivos, então o formato de nome é agora DDMMYY, sem separadores
 -Automatizar criação do cabeçalho no arquivo do ESP32 [FEITO]
+-Pesquisar sobre como enviar as linhas de CSV para um servidor em nuvem, possivelmente ThingSpeak

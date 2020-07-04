@@ -10,7 +10,7 @@
 #define TXD2 17
 #define CS_PIN 4
 
-AsyncWebServer server(80);
+AsyncWebServer server(8008);
 
 bool saveFlag = false, endFlag = false, startFlag = false;
 char myChar;
@@ -27,6 +27,12 @@ IPAddress gateway(192, 168, 15, 1);
 IPAddress subnet(255, 255, 255, 0);
 IPAddress dns1(192, 168, 15, 1);
 IPAddress dns2(200, 175, 89, 139);
+
+String makeFileName(String rawName) {
+  String finalName = rawName.substring(0, 3) + "-" + rawName.substring(3, 5) + "-" + rawName.substring(5, 11);
+  finalName.toUpperCase();
+  return finalName;
+}
 
 void setup(){
 // Inicialização de recursos, WiFi, comunicação serial e sistema de armazenamento de memória flash interna
@@ -79,7 +85,6 @@ void setup(){
       file = dir.openNextFile();
     }
 
-    Serial.println(list);
     Serial.println("Lista enviada");
     dir.close();
     file.close();
@@ -91,7 +96,7 @@ void setup(){
     fname += request->arg("filename"); // No AsyncWebServer é preciso especificar o 'name' do argumento enviado, não o índice
     Serial.print("Download requisitado: "); // O nome de um argumento ainda pode ser verificado com a sintaxe request->argName(índice)
     Serial.println(fname);
-    request->send(SD, fname, "text/text", true);
+    request->send(SD, fname, "text/csv", true);
     });  
     
   server.begin();
@@ -102,6 +107,7 @@ void loop(void) {
   while(Serial1.available() > 0){
   myChar = char(Serial1.read());
   if (myChar == '>') {
+    fileToUpdate = makeFileName(fileToUpdate);
     Serial.println(fileToUpdate);
     Serial.println(lineBuffer);
     dayFile = SD.open("/dados/" + fileToUpdate, "a");

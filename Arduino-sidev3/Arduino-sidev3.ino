@@ -23,7 +23,7 @@ DS3231 rtc(SDA, SCL); // Inicialização RTC
 
 Time tempo;
 
-char fileDate[14] = {0};
+char fileDate[15] = {0};
 
 void createFile(void);
 void storeData(void);
@@ -230,21 +230,24 @@ void createFile(){
   if(i == 0) generator = 'A';
   if(i == 1) generator = 'B';
 
-// Geração do nome do arquivo
-  String fileDateString = String(generator) + String(tempo.date) + "-" + String(tempo.mon) + "-" + String(tempo.year-2000) + ".csv" ;
-  fileDateString.toCharArray(fileDate, 14);
-
-// Cabeçalho do arquivo
+  // Definição do nome do arquivo em um vetor de caracteres
+  sprintf(fileDate, "%c%02d%02d%d.csv", generator, tempo.date, tempo.mon, tempo.year-2000);
+  Serial.println(fileDate);
+  
+  // Cabeçalho do arquivo
   if (SD.exists(fileDate) == false) {
     data = SD.open (fileDate, FILE_WRITE);
     if (data) {
       data.println("Hora ; I DC ; I DC rms ; V DC ; V DC rms ; P DC ; I AC rms ; V AC rms ; S ; FP ");
       data.close();
       Serial1.print("<");
-      Serial1.print(fileDateString);
+      Serial1.print(fileDate);
       Serial1.print("|");
       Serial1.print("Hora ; I DC ; I DC rms ; V DC ; V DC rms ; P DC ; I AC rms ; V AC rms ; S ; FP ");
       Serial1.print(">");
+      Serial.println("Dados salvos!");
+    } else {
+      Serial.println("Não foi possível criar o novo arquivo");
     }
   }
 }
