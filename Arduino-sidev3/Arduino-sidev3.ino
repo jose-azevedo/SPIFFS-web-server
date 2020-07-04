@@ -16,14 +16,14 @@
 #define stepADC 0.00481640625 // 4,932/1024
 #define M 10 // Total de valores para cálculo da média de valores instantâneos
 #define pinCS 53
-#define interval 1
+#define interval 5
 
 File data;
-DS3231 rtc(SDA, SCL); // Inicialização RTC
 
+DS3231 rtc(SDA, SCL); // Inicialização RTC
 Time tempo;
 
-char fileDate[15] = {0};
+char filePath[21] = {0};
 
 void createFile(void);
 void storeData(void);
@@ -227,28 +227,84 @@ void next(){
 */
 void createFile(){
   char generator = {0};
+  char directory[9] = {0};
   if(i == 0) generator = 'A';
   if(i == 1) generator = 'B';
 
-  // Definição do nome do arquivo em um vetor de caracteres
-  sprintf(fileDate, "%c%02d%02d%d.csv", generator, tempo.date, tempo.mon, tempo.year-2000);
-  Serial.println(fileDate);
+  // Geração do nome e da rota do arquivo em vetores de caracteres
+
+  switch (tempo.mon) {
+    case 1:
+    sprintf(filePath, "%d/JUL/A%02d%02d%d.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000);
+    sprintf(directory, "%d/JAN/", tempo.year);
+    break;
+    case 2:
+    sprintf(filePath, "%d/JUL/A%02d%02d%d.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000);
+    sprintf(directory, "%d/FEV", tempo.year);
+    break;
+    case 3:
+    sprintf(filePath, "%d/JUL/A%02d%02d%d.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000);
+    sprintf(directory, "%d/MAR", tempo.year);
+    break;
+    case 4:
+    sprintf(filePath, "%d/JUL/A%02d%02d%d.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000);
+    sprintf(directory, "%d/ABR", tempo.year);
+    break;
+    case 5:
+    sprintf(filePath, "%d/JUL/A%02d%02d%d.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000);
+    sprintf(directory, "%d/MAI", tempo.year);
+    break;
+    case 6:
+    sprintf(filePath, "%d/JUL/A%02d%02d%d.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000);
+    sprintf(directory, "%d/JUN", tempo.year);
+    break;
+    case 7:
+    sprintf(directory, "%d/JUL", tempo.year);
+    sprintf(filePath, "%d/JUL/%c%02d%02d%d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
+    break;
+    case 8:
+    sprintf(directory, "%d/AGO", tempo.year);
+    sprintf(filePath, "%d/JUL/A%02d%02d%d.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000);
+    break;
+    case 9:
+    sprintf(filePath, "%d/JUL/A%02d%02d%d.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000);
+    sprintf(directory, "%d/SET", tempo.year);
+    break;
+    case 10:
+    sprintf(filePath, "%d/JUL/A%02d%02d%d.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000);
+    sprintf(directory, "%d/OUT", tempo.year);
+    break;
+    case 11:
+    sprintf(filePath, "%d/JUL/A%02d%02d%d.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000);
+    sprintf(directory, "%d/NOV", tempo.year);
+    break;
+    case 12:
+    sprintf(filePath, "%d/JUL/A%02d%02d%d.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000);
+    sprintf(directory, "%d/DEZ", tempo.year);
+    break;
+  }
+  Serial.println(directory);
   
   // Cabeçalho do arquivo
-  if (SD.exists(fileDate) == false) {
-    data = SD.open (fileDate, FILE_WRITE);
-    if (data) {
-      data.println("Hora ; I DC ; I DC rms ; V DC ; V DC rms ; P DC ; I AC rms ; V AC rms ; S ; FP ");
-      data.close();
-      Serial1.print("<");
-      Serial1.print(fileDate);
-      Serial1.print("|");
-      Serial1.print("Hora ; I DC ; I DC rms ; V DC ; V DC rms ; P DC ; I AC rms ; V AC rms ; S ; FP ");
-      Serial1.print(">");
-      Serial.println("Dados salvos!");
-    } else {
-      Serial.println("Não foi possível criar o novo arquivo");
+  if(SD.mkdir(directory)){
+    Serial.println("Criou diretório");
+    if (!SD.exists(filePath)) {
+      data = SD.open (filePath, FILE_WRITE);
+      if (data) {
+        data.println("Hora ; I DC ; I DC rms ; V DC ; V DC rms ; P DC ; I AC rms ; V AC rms ; S ; FP ");
+        data.close();
+        Serial1.print("<");
+        Serial1.print(filePath);
+        Serial1.print("|");
+        Serial1.print("Hora ; I DC ; I DC rms ; V DC ; V DC rms ; P DC ; I AC rms ; V AC rms ; S ; FP ");
+        Serial1.print(">");
+        Serial.println("Novo arquivo criado");
+      } else {
+        Serial.println("Não foi possível criar o novo arquivo");
+      }
     }
+  } else {
+    Serial.println("Não criou diretório");
   }
 }
 
@@ -262,15 +318,16 @@ void storeData(){
 
   String fileData = String(rtc.getTimeStr()) + " ; " + String(acc_avgI_DC[i]/acc) + " ; " + String(acc_rmsI_DC[i]/acc) + " ; " + String(acc_avgV_DC[i]/acc) + " ; " + String(acc_rmsV_DC[i]/acc) + " ; " + String(accP_DC[i]/acc) + " ; " + String(acc_rmsI_AC[i]/acc) + " ; " + String(acc_rmsV_AC[i]/acc) + " ; " + String(accS[i]/acc) + " ; " + String(accFP[i]/acc);
   
-  data = SD.open(fileDate, FILE_WRITE);
+  data = SD.open(filePath, FILE_WRITE);
     if (data) {
   data.println(fileData);
   data.close();
   Serial1.print("<");
-  Serial1.print(fileDate);
+  Serial1.print(filePath);
   Serial1.print("|");
   Serial1.print(fileData);
   Serial1.print(">");
+  Serial.println("Dados salvos!");
   }
 }
 

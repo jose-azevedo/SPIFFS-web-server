@@ -29,7 +29,7 @@ IPAddress dns1(192, 168, 15, 1);
 IPAddress dns2(200, 175, 89, 139);
 
 String makeFileName(String rawName) {
-  String finalName = rawName.substring(0, 3) + "-" + rawName.substring(3, 5) + "-" + rawName.substring(5, 11);
+  String finalName = rawName.substring(9, 12) + "-" + rawName.substring(12, 14) + "-" + rawName.substring(14);
   finalName.toUpperCase();
   return finalName;
 }
@@ -100,57 +100,37 @@ void setup(){
     });  
     
   server.begin();
-
 }
 
 void loop(void) {
   while(Serial1.available() > 0){
-  myChar = char(Serial1.read());
-  if (myChar == '>') {
-    fileToUpdate = makeFileName(fileToUpdate);
-    Serial.println(fileToUpdate);
-    Serial.println(lineBuffer);
-    dayFile = SD.open("/dados/" + fileToUpdate, "a");
-    if(dayFile){
-      dayFile.println(lineBuffer);
-      dayFile.close();
-      Serial.println("Dados salvos!");
-    } else {
-      Serial.print("Arquivo não abriu");
+    myChar = char(Serial1.read());
+    if (myChar == '>') {
+      fileToUpdate = makeFileName(fileToUpdate);
+      Serial.print("Arquivo atualizado: ");
+      Serial.println(fileToUpdate);
+      Serial.println(lineBuffer);
+      dayFile = SD.open("/dados/" + fileToUpdate, "a");
+      if(dayFile){
+        dayFile.println(lineBuffer);
+        dayFile.close();
+      } else {
+        Serial.print("Arquivo não abriu");
+      }
+      lineBuffer = "";
+      saveFlag = false;
+      endFlag = true;
+    } 
+    else if (myChar == '|'){
+      fileToUpdate =  lineBuffer;
+      Serial.println(fileToUpdate);
+      lineBuffer = "";
     }
-    lineBuffer = "";
-    saveFlag = false;
-    endFlag = true;
-  } 
-  else if (myChar == '|'){
-    fileToUpdate =  lineBuffer;
-    lineBuffer = "";
-  }
-  else if (saveFlag) {
-    lineBuffer += myChar;
-    //Serial.print(myChar);
-  }  
-  else if (myChar == '<') {
-    saveFlag = true;
+    else if (saveFlag) {
+      lineBuffer += myChar;
+    }  
+    else if (myChar == '<') {
+      saveFlag = true;
+    }
   }
 }
-}
-
-/*
-  while(Serial1.available() > 0){
-  myChar = char(Serial1.read());
-  if (myChar == '>') {
-    newFile.close();
-    Serial.println("Arquivo escrito");
-    saveFlag = false;
-    endFlag = true;
-  }
-  else if (saveFlag) {
-    newFile.print(myChar);
-  }  
-  else if (myChar == '<') {
-    saveFlag = true;
-    newFile = SPIFFS.open(fname, "a");
-  }
-}
-*/
