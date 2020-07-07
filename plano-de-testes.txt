@@ -11,5 +11,10 @@
 03/07/2020
 -Mudar formato de data de D/M/YY para DD/MM/YY [FEITO] OBS: A biblioteca utiliza o formato 8.3 pra nomear os arquivos, então o formato de nome é agora DDMMYY, sem separadores
 -Automatizar criação do cabeçalho no arquivo do ESP32 [FEITO]
--Pesquisar sobre como enviar as linhas de CSV para um servidor em nuvem, possivelmente ThingSpeak
 -Automatizar criação de diretórios no lado do Arduino [FEITO]
+
+04/07/2020
+-Fazer uma função separada para enviar os dados do Arduino pro ESP32 
+
+05/07/2020
+-
