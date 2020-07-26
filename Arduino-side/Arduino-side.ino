@@ -16,7 +16,7 @@
 #define stepADC 0.00481640625 // 4,932/1024
 #define M 10 // Total de valores para cálculo da média de valores instantâneos
 #define pinCS 53
-#define interval 5
+#define interval 1
 
 File data;
 
@@ -235,28 +235,28 @@ void createFile(){
 
   switch (tempo.mon) {
     case 1:
-    sprintf(filePath, "%d/JUL/A%02d%02d%d.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000);
     sprintf(directory, "%d/JAN/", tempo.year);
+    sprintf(filePath, "%d/JAN/%c%02d%02d%d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
     break;
     case 2:
-    sprintf(filePath, "%d/JUL/A%02d%02d%d.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000);
     sprintf(directory, "%d/FEV", tempo.year);
+    sprintf(filePath, "%d/FEV/%c%02d%02d%d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
     break;
     case 3:
-    sprintf(filePath, "%d/JUL/A%02d%02d%d.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000);
     sprintf(directory, "%d/MAR", tempo.year);
+    sprintf(filePath, "%d/MAR/%c%02d%02d%d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
     break;
     case 4:
-    sprintf(filePath, "%d/JUL/A%02d%02d%d.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000);
     sprintf(directory, "%d/ABR", tempo.year);
+    sprintf(filePath, "%d/ABR/%c%02d%02d%d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
     break;
     case 5:
-    sprintf(filePath, "%d/JUL/A%02d%02d%d.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000);
     sprintf(directory, "%d/MAI", tempo.year);
+    sprintf(filePath, "%d/MAI/%c%02d%02d%d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
     break;
     case 6:
-    sprintf(filePath, "%d/JUL/A%02d%02d%d.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000);
     sprintf(directory, "%d/JUN", tempo.year);
+    sprintf(filePath, "%d/JUN/%c%02d%02d%d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
     break;
     case 7:
     sprintf(directory, "%d/JUL", tempo.year);
@@ -264,23 +264,23 @@ void createFile(){
     break;
     case 8:
     sprintf(directory, "%d/AGO", tempo.year);
-    sprintf(filePath, "%d/JUL/A%02d%02d%d.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000);
+    sprintf(filePath, "%d/AGO/%c%02d%02d%d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
     break;
     case 9:
-    sprintf(filePath, "%d/JUL/A%02d%02d%d.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000);
     sprintf(directory, "%d/SET", tempo.year);
+    sprintf(filePath, "%d/SET/%c%02d%02d%d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
     break;
     case 10:
-    sprintf(filePath, "%d/JUL/A%02d%02d%d.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000);
     sprintf(directory, "%d/OUT", tempo.year);
+    sprintf(filePath, "%d/OUT/%c%02d%02d%d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
     break;
     case 11:
-    sprintf(filePath, "%d/JUL/A%02d%02d%d.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000);
     sprintf(directory, "%d/NOV", tempo.year);
+    sprintf(filePath, "%d/NOV/%c%02d%02d%d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
     break;
     case 12:
-    sprintf(filePath, "%d/JUL/A%02d%02d%d.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000);
     sprintf(directory, "%d/DEZ", tempo.year);
+    sprintf(filePath, "%d/DEZ/%c%02d%02d%d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
     break;
   }
   Serial.println(directory);
@@ -291,12 +291,12 @@ void createFile(){
     if (!SD.exists(filePath)) {
       data = SD.open (filePath, FILE_WRITE);
       if (data) {
-        data.println("Hora ; I DC ; I DC rms ; V DC ; V DC rms ; P DC ; I AC rms ; V AC rms ; S ; FP ");
+        data.println("Hora;I DC;I DC rms;V DC;V DC rms;P DC;I AC rms;V AC rms;S;FP");
         data.close();
         Serial1.print("<");
         Serial1.print(filePath);
         Serial1.print("|");
-        Serial1.print("Hora ; I DC ; I DC rms ; V DC ; V DC rms ; P DC ; I AC rms ; V AC rms ; S ; FP ");
+        Serial1.print("Hora;I DC;I DC rms;V DC;V DC rms;P DC;I AC rms;V AC rms;S;FP");
         Serial1.print(">");
         Serial.println("Novo arquivo criado");
       } else {
@@ -316,7 +316,7 @@ void createFile(){
 */
 void storeData(){
 
-  String fileData = String(rtc.getTimeStr()) + " ; " + String(acc_avgI_DC[i]/acc) + " ; " + String(acc_rmsI_DC[i]/acc) + " ; " + String(acc_avgV_DC[i]/acc) + " ; " + String(acc_rmsV_DC[i]/acc) + " ; " + String(accP_DC[i]/acc) + " ; " + String(acc_rmsI_AC[i]/acc) + " ; " + String(acc_rmsV_AC[i]/acc) + " ; " + String(accS[i]/acc) + " ; " + String(accFP[i]/acc);
+  String fileData = String(rtc.getTimeStr()) + ";" + String(acc_avgI_DC[i]/acc) + ";" + String(acc_rmsI_DC[i]/acc) + ";" + String(acc_avgV_DC[i]/acc) + ";" + String(acc_rmsV_DC[i]/acc) + ";" + String(accP_DC[i]/acc) + ";" + String(acc_rmsI_AC[i]/acc) + ";" + String(acc_rmsV_AC[i]/acc) + ";" + String(accS[i]/acc) + ";" + String(accFP[i]/acc);
   
   data = SD.open(filePath, FILE_WRITE);
     if (data) {

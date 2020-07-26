@@ -1,6 +1,9 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiClient.h>
+
+#include <HTTPClient.h>
+
 #include <SD.h>
 #include "SPI.h"
 #include "ESPAsyncWebServer.h"
@@ -9,8 +12,10 @@
 #define RXD2 16
 #define TXD2 17
 #define CS_PIN 4
+#define httpPort 8008
 
-AsyncWebServer server(8008);
+AsyncWebServer server(httpPort);
+HTTPClient http;
 
 bool saveFlag = false, endFlag = false, startFlag = false;
 char myChar;
@@ -27,6 +32,8 @@ IPAddress gateway(192, 168, 15, 1);
 IPAddress subnet(255, 255, 255, 0);
 IPAddress dns1(192, 168, 15, 1);
 IPAddress dns2(200, 175, 89, 139);
+
+IPAddress localhost(192, 168, 15, 111);
 
 String makeFileName(String rawName) {
   String finalName = rawName.substring(9, 12) + "-" + rawName.substring(12, 14) + "-" + rawName.substring(14);
@@ -62,6 +69,27 @@ void setup(){
     delay(500);
   }
   Serial.println("");
+
+  // WiFiClient client;
+  // if (!client.connect(localhost, 5000)) {
+  //   Serial.println("Não foi possível se conectar ao servidor");
+  //   return;
+  // } else {
+  //   Serial.println("Conectado ao servidor");
+  // }
+
+  // client.print(String("POST http://localhost:5000/upload HTTP/1.1\r\n")+
+  // "Host: http://localhost\r\n" +
+  // "Connection: close\r\n\r\n");
+  // unsigned long timeout = millis();
+  // while (client.available() == 0) {
+  //     if (millis() - timeout > 5000) {
+  //         Serial.println(">>> Client Timeout !");
+  //         client.stop();}}
+  // while(client.available()) {
+  //   String line = client.readStringUntil('\r');
+  //   Serial.print(line);
+  // }
 
 // Imprime na tela o IP atribuído dinamicamente
   Serial.print("IP Adress: "); 
@@ -116,6 +144,26 @@ void loop(void) {
         dayFile.close();
       } else {
         Serial.print("Arquivo não abriu");
+      }
+      http.begin("http://192.168.15.111:5000/upload");
+      http.addHeader("Content-Type", "application/json");
+      http.addHeader("Connection", "keep-alive");
+
+      String JSONReqBody = "{\"name\":\"" + fileToUpdate + "\",\"data\":\"" + lineBuffer + "\"}";
+      Serial.println(JSONReqBody);
+      int httpResponseCode = http.POST(JSONReqBody);
+
+      if(httpResponseCode>0){
+      
+        String response = http.getString(); //Get the response to the request
+        Serial.print("Requisição enviada: ");
+        Serial.println(httpResponseCode);
+      
+      }else{
+      
+        Serial.print("Error on sending POST: ");
+        Serial.println(httpResponseCode);
+      
       }
       lineBuffer = "";
       saveFlag = false;
