@@ -24,6 +24,7 @@ DS3231 rtc(SDA, SCL); // Inicialização RTC
 Time tempo;
 
 char filePath[21] = {0};
+String linesToAppend = "";
 
 void createFile(void);
 void storeData(void);
@@ -283,22 +284,23 @@ void createFile(){
     sprintf(filePath, "%d/DEZ/%c%02d%02d%d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
     break;
   }
-  Serial.println(directory);
+
+  const String header = "Hora;I DC;I DC rms;V DC;V DC rms;P DC;I AC rms;V AC rms;S;FP";
   
   // Cabeçalho do arquivo
   if(SD.mkdir(directory)){
-    Serial.println("Criou diretório");
+    Serial.print("Diretório aberto: ");
+    Serial.println(directory);
     if (!SD.exists(filePath)) {
       data = SD.open (filePath, FILE_WRITE);
       if (data) {
-        data.println("Hora;I DC;I DC rms;V DC;V DC rms;P DC;I AC rms;V AC rms;S;FP");
+        data.println(header);
         data.close();
-        Serial1.print("<");
-        Serial1.print(filePath);
-        Serial1.print("|");
-        Serial1.print("Hora;I DC;I DC rms;V DC;V DC rms;P DC;I AC rms;V AC rms;S;FP");
-        Serial1.print(">");
-        Serial.println("Novo arquivo criado");
+
+        linesToAppend += header + "\n";
+
+        Serial.print("Novo arquivo criado: ");
+        Serial.println(filePath);
       } else {
         Serial.println("Não foi possível criar o novo arquivo");
       }
@@ -317,19 +319,31 @@ void createFile(){
 void storeData(){
 
   String fileData = String(rtc.getTimeStr()) + ";" + String(acc_avgI_DC[i]/acc) + ";" + String(acc_rmsI_DC[i]/acc) + ";" + String(acc_avgV_DC[i]/acc) + ";" + String(acc_rmsV_DC[i]/acc) + ";" + String(accP_DC[i]/acc) + ";" + String(acc_rmsI_AC[i]/acc) + ";" + String(acc_rmsV_AC[i]/acc) + ";" + String(accS[i]/acc) + ";" + String(accFP[i]/acc);
+
+  Serial.println("Linha antes da substituição: " + fileData);
+  fileData.replace(".",",");
+  Serial.println("Linha depois da substituição: " + fileData);
   
   data = SD.open(filePath, FILE_WRITE);
     if (data) {
   data.println(fileData);
   data.close();
-  Serial1.print("<");
-  Serial1.print(filePath);
-  Serial1.print("|");
-  Serial1.print(fileData);
-  Serial1.print(">");
-  Serial.println("Dados salvos!");
+  Serial.print("Arquivo atualizado: ");
+  Serial.println(filePath);
+  linesToAppend += fileData;
   }
 }
+
+void sendToESP32(){
+  String messageBuffer = "<" + String(filePath) + "|" + linesToAppend + ">";
+  Serial1.print(messageBuffer);
+  linesToAppend = "";
+  Serial.println("Dados enviados para o ESP32");
+}
+
+//String commaAsSeparator(float value){
+//  int 
+//}
 
 /*
   Função acumuladora.
@@ -580,14 +594,13 @@ void loop() {
       tempo = rtc.getTime(); // Variável recebedora da informação de tempo
       if (tempo.min > timeToSave) timeToSave = (tempo.min/interval + 1)*interval; // Os dados só são salvos em minutos múltiplos de 5
       if (timeToSave > tempo.min + interval) timeToSave = 0; // Condição para reiniciar o ciclo quando min0 superar 55
-      Serial.print(tempo.min);
-      Serial.print("\t");
-      Serial.println(timeToSave);
       if (tempo.min == timeToSave && x == 1){ // Salvar os dados após o tempo de espera e somente quando após os cálculos de AC2
-        Serial.println("Entrou no laço");
+        Serial.println("Salvando dados...");
         for (i=0; i<=1; i++){
           createFile();  
           storeData();
+          sendToESP32();
+          Serial.println("\n----------------------------------------------------------------\n");
         }
         accumulateClear();
         timeToSave = timeToSave + interval;

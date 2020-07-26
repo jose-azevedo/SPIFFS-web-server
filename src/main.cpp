@@ -41,6 +41,28 @@ String makeFileName(String rawName) {
   return finalName;
 }
 
+void sendToGoogleDrive(String fileName, String data) {
+  http.begin("http://192.168.15.111:5000/upload");
+  http.addHeader("Content-Type", "application/json");
+  http.addHeader("Connection", "keep-alive");
+
+  data.replace("\n",";");
+
+  String JSONReqBody = "{\"name\":\"" + fileName + "\",\"data\":\"" + data + "\"}";
+  int httpResponseCode = http.POST(JSONReqBody);
+
+  if(httpResponseCode>0){
+  
+    String response = http.getString();
+    Serial.print("Requisição para atualização de arquivos no Google Drive enviada.\nCódigo de resposta: ");
+    Serial.println(httpResponseCode);
+  
+  }else{
+    Serial.print("Erro ao enviar a requisição POST: ");
+    Serial.println(httpResponseCode);
+  }
+}
+
 void setup(){
 // Inicialização de recursos, WiFi, comunicação serial e sistema de armazenamento de memória flash interna
   if (WiFi.config(staticIP, gateway, subnet, dns1, dns2) == false) {
@@ -69,27 +91,6 @@ void setup(){
     delay(500);
   }
   Serial.println("");
-
-  // WiFiClient client;
-  // if (!client.connect(localhost, 5000)) {
-  //   Serial.println("Não foi possível se conectar ao servidor");
-  //   return;
-  // } else {
-  //   Serial.println("Conectado ao servidor");
-  // }
-
-  // client.print(String("POST http://localhost:5000/upload HTTP/1.1\r\n")+
-  // "Host: http://localhost\r\n" +
-  // "Connection: close\r\n\r\n");
-  // unsigned long timeout = millis();
-  // while (client.available() == 0) {
-  //     if (millis() - timeout > 5000) {
-  //         Serial.println(">>> Client Timeout !");
-  //         client.stop();}}
-  // while(client.available()) {
-  //   String line = client.readStringUntil('\r');
-  //   Serial.print(line);
-  // }
 
 // Imprime na tela o IP atribuído dinamicamente
   Serial.print("IP Adress: "); 
@@ -132,46 +133,31 @@ void setup(){
 
 void loop(void) {
   while(Serial1.available() > 0){
+
     myChar = char(Serial1.read());
+
     if (myChar == '>') {
       fileToUpdate = makeFileName(fileToUpdate);
-      Serial.print("Arquivo atualizado: ");
-      Serial.println(fileToUpdate);
-      Serial.println(lineBuffer);
       dayFile = SD.open("/dados/" + fileToUpdate, "a");
+
       if(dayFile){
         dayFile.println(lineBuffer);
         dayFile.close();
+        Serial.println("Arquivo atualizado: " + fileToUpdate);
+        Serial.println("Conteúdo adicionado:\n" + lineBuffer + "\n");
       } else {
         Serial.print("Arquivo não abriu");
       }
-      http.begin("http://192.168.15.111:5000/upload");
-      http.addHeader("Content-Type", "application/json");
-      http.addHeader("Connection", "keep-alive");
 
-      String JSONReqBody = "{\"name\":\"" + fileToUpdate + "\",\"data\":\"" + lineBuffer + "\"}";
-      Serial.println(JSONReqBody);
-      int httpResponseCode = http.POST(JSONReqBody);
+      sendToGoogleDrive(fileToUpdate, lineBuffer);
 
-      if(httpResponseCode>0){
-      
-        String response = http.getString(); //Get the response to the request
-        Serial.print("Requisição enviada: ");
-        Serial.println(httpResponseCode);
-      
-      }else{
-      
-        Serial.print("Error on sending POST: ");
-        Serial.println(httpResponseCode);
-      
-      }
       lineBuffer = "";
       saveFlag = false;
       endFlag = true;
+      Serial.println("\n------------------------------------------------------------------\n");
     } 
     else if (myChar == '|'){
       fileToUpdate =  lineBuffer;
-      Serial.println(fileToUpdate);
       lineBuffer = "";
     }
     else if (saveFlag) {
