@@ -42,7 +42,7 @@ String makeFileName(String rawName) {
 }
 
 void sendToGoogleDrive(String fileName, String data) {
-  http.begin("http://192.168.15.111:5000/upload");
+  http.begin("https://monitoring-autouploader.herokuapp.com/upload");
   http.addHeader("Content-Type", "application/json");
   http.addHeader("Connection", "keep-alive");
 
