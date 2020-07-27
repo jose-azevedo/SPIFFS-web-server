@@ -16,7 +16,7 @@
 #define stepADC 0.00481640625 // 4,932/1024
 #define M 10 // Total de valores para cálculo da média de valores instantâneos
 #define pinCS 53
-#define interval 1
+#define interval 5
 
 File data;
 
@@ -319,10 +319,7 @@ void createFile(){
 void storeData(){
 
   String fileData = String(rtc.getTimeStr()) + ";" + String(acc_avgI_DC[i]/acc) + ";" + String(acc_rmsI_DC[i]/acc) + ";" + String(acc_avgV_DC[i]/acc) + ";" + String(acc_rmsV_DC[i]/acc) + ";" + String(accP_DC[i]/acc) + ";" + String(acc_rmsI_AC[i]/acc) + ";" + String(acc_rmsV_AC[i]/acc) + ";" + String(accS[i]/acc) + ";" + String(accFP[i]/acc);
-
-  Serial.println("Linha antes da substituição: " + fileData);
   fileData.replace(".",",");
-  Serial.println("Linha depois da substituição: " + fileData);
   
   data = SD.open(filePath, FILE_WRITE);
     if (data) {
