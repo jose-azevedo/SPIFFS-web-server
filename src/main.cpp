@@ -1,9 +1,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
-#include <WiFiClient.h>
-
 #include <HTTPClient.h>
-
+#include <ArduinoJson.h>
 #include <SD.h>
 #include "SPI.h"
 #include "ESPAsyncWebServer.h"
@@ -27,6 +25,9 @@ int i = 0;
 const char* ssid = "Azevedo";
 const char* password = "familiaea";
 
+const String apiKey = "AIzaSyDJwclO7HGCUvx7SXQzu1JjJG2HTXKHqaE";
+const String token = "ya29.a0AfH6SMCyZ53AVBEzo8wht2lm1mU9MiMdfTze2RKR90tYGKxPgr7mwpfs_1r2YiCiMU_Dkv4Mx87vWRkQSGSJXO96hVqJEkJ-aG9EkoKSHkN1tOOgfFcQNDiyYbbEYnF9t8hlTbKWbAsibruIhrfCFmAJVLq7Ean2Q94M";
+
 IPAddress staticIP(192, 168, 15, 47);
 IPAddress gateway(192, 168, 15, 1);
 IPAddress subnet(255, 255, 255, 0);
@@ -41,23 +42,146 @@ String makeFileName(String rawName) {
   return finalName;
 }
 
-void sendToGoogleDrive(String fileName, String data) {
-  http.begin("https://monitoring-autouploader.herokuapp.com/upload");
+void getErrorMessage(String rawResponse){
+  const size_t capacity = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(3) + JSON_OBJECT_SIZE(5) + 170;
+  DynamicJsonDocument parsedResponse(capacity);
+  deserializeJson(parsedResponse, rawResponse);
+  JsonObject error = parsedResponse["error"];
+  const char* error_message = error["message"];
+  Serial.print("Mensagem de erro: ");
+  Serial.println(error_message);
+}
+
+void updateFileOnGoogleDrive(String id, String data) {
+  http.begin("https://sheets.googleapis.com/v4/spreadsheets/" + id + "/values/A1%3AJ1:append?valueInputOption=USER_ENTERED&key=" + apiKey);
+  http.addHeader("Authorization", "Bearer " + token);
   http.addHeader("Content-Type", "application/json");
-  http.addHeader("Connection", "keep-alive");
-
-  data.replace("\n",";");
-
-  String JSONReqBody = "{\"name\":\"" + fileName + "\",\"data\":\"" + data + "\"}";
+  http.addHeader("Accept", "application/json");
+  
+  String JSONReqBody = "{\"values\": [[" + data + "]],\"range\": \"A1:J1\"}";
+ 
   int httpResponseCode = http.POST(JSONReqBody);
+  
+  if(httpResponseCode>0){
+    String rawResponse = http.getString();
+  
+    Serial.print("Requisição para atualização do arquivo no Google Drive enviada.\nCódigo de resposta: ");
+    Serial.println(httpResponseCode);
+    // Serial.println("Resposta recebida:");
+    // Serial.println(rawResponse);
+    // Para receber o objeto JSON completo de resposta "descomentar" as duas linhas acima
+
+    if(httpResponseCode == 200){
+      Serial.println("Arquivo atualizado com sucesso!\n");
+    } else {
+      getErrorMessage(rawResponse);
+    }
+  }else{
+    Serial.print("Erro ao enviar a requisição POST: ");
+    Serial.println(httpResponseCode);
+  }
+}
+
+void createFileOnGoogleDrive(String name, String data) {
+  http.begin("https://www.googleapis.com/drive/v3/files?key=" + apiKey);
+  http.addHeader("Authorization", "Bearer " + token);
+  http.addHeader("Content-Type", "application/json");
+  http.addHeader("Accept", "application/json");
+
+  String JSONReqBody = "{\"name\": \""+name+"\",\"mimeType\": \"application/vnd.google-apps.spreadsheet\"}";
+  
+  int httpResponseCode = http.POST(JSONReqBody);
+  
+  if(httpResponseCode>0){
+    String rawResponse = http.getString();
+
+    Serial.println("Criação do arquivo " + name + " solicitada.\nCódigo de resposta: " + httpResponseCode);
+    // Serial.println("Resposta recebida:");
+    // Serial.println(rawResponse);
+    // Para receber o objeto JSON completo de resposta "descomentar" as duas linhas acima
+
+    if(httpResponseCode == 200){
+      Serial.println("Arquivo criado com sucesso!\n");
+
+      const size_t capacity = JSON_OBJECT_SIZE(4) + 150;
+      DynamicJsonDocument parsedResponse(capacity);
+      deserializeJson(parsedResponse, rawResponse);
+ 
+      String fileId = parsedResponse["id"];
+      updateFileOnGoogleDrive(fileId, data);
+    } else {
+      getErrorMessage(rawResponse);
+    }
+  }else{
+    Serial.print("Erro ao enviar a requisição POST: ");
+    Serial.println(httpResponseCode);
+  }
+}
+
+void searchFileOnGoogleDrive(String name, String dataToAppend) {
+  http.begin("https://www.googleapis.com/drive/v3/files?pageSize=10&q=name%3D'" + name + "'&fields=nextPageToken%2C%20files(id%2C%20name)&key=" + apiKey);
+  http.addHeader("Authorization", "Bearer " + token);
+  http.addHeader("Content-Type", "application/json");
+  http.addHeader("Accept", "application/json");
+
+  int httpResponseCode = http.GET();
 
   if(httpResponseCode>0){
-  
-    String response = http.getString();
-    Serial.print("Requisição para atualização de arquivos no Google Drive enviada.\nCódigo de resposta: ");
-    Serial.println(httpResponseCode);
-  
-  }else{
+    String rawResponse = http.getString();
+
+    Serial.println("Busca pelo arquivo " + name + " solicitada.\nCódigo de resposta: " + httpResponseCode);
+    // Serial.println("Resposta recebida:");
+    // Serial.println(rawResponse);
+    // Para receber o objeto JSON completo de resposta "descomentar" as duas linhas acima
+
+    if(httpResponseCode == 200){
+      const size_t capacity = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(2) + 90;
+      DynamicJsonDocument parsedResponse(capacity);
+      deserializeJson(parsedResponse, rawResponse);
+      
+      const char* foundFileChar = parsedResponse["files"][0]["name"];
+      const char* foundIdChar = parsedResponse["files"][0]["id"];
+
+      String foundFile = String(foundFileChar);
+      String foundId = String(foundIdChar);
+
+      if(foundFile.length() > 0){
+        Serial.println("Arquivo e ID encontrados:");
+        Serial.println(foundFile);
+        Serial.println(foundId + "\n");
+
+        String timeStamp = dataToAppend.substring(0, 8);
+        timeStamp = "\"" + timeStamp + "\"";
+
+        String values = dataToAppend.substring(8);
+        values.replace(",",".");
+        values.replace(";",",");
+
+        dataToAppend = timeStamp + values;
+
+        Serial.println(dataToAppend);
+
+        updateFileOnGoogleDrive(foundId, dataToAppend);
+      } else {
+        Serial.println("Nenhum arquivo encontrado\n");
+
+        String HeaderAndTime = dataToAppend.substring(0, 69);
+        HeaderAndTime.replace(";","\",\"");
+        HeaderAndTime.replace("\n","\"],[\"");
+        HeaderAndTime = "\"" + HeaderAndTime + "\"";
+
+        String values = dataToAppend.substring(69);
+        values.replace(",",".");
+        values.replace(";",",");
+
+        dataToAppend = HeaderAndTime + values;
+        Serial.println(dataToAppend);
+        createFileOnGoogleDrive(name, dataToAppend);
+      }
+    } else {
+      getErrorMessage(rawResponse);
+    }
+  } else {
     Serial.print("Erro ao enviar a requisição POST: ");
     Serial.println(httpResponseCode);
   }
@@ -129,6 +253,7 @@ void setup(){
     });  
     
   server.begin();
+  
 }
 
 void loop(void) {
@@ -149,7 +274,7 @@ void loop(void) {
         Serial.print("Arquivo não abriu");
       }
 
-      sendToGoogleDrive(fileToUpdate, lineBuffer);
+      searchFileOnGoogleDrive(fileToUpdate, lineBuffer);
 
       lineBuffer = "";
       saveFlag = false;
