@@ -18,15 +18,12 @@ HTTPClient http;
 bool saveFlag = false, endFlag = false, startFlag = false;
 char myChar;
 String lineBuffer = "", fileToUpdate = "";
-File dayFile;
+File config, dayFile;
 int i = 0;
 
-// Credenciais da rede WiFi, nome da rede e senha
-const char* ssid = "Azevedo";
-const char* password = "familiaea";
+StaticJsonDocument<475> jsonConfig;
 
-const String apiKey = "AIzaSyDJwclO7HGCUvx7SXQzu1JjJG2HTXKHqaE";
-const String token = "ya29.a0AfH6SMCyZ53AVBEzo8wht2lm1mU9MiMdfTze2RKR90tYGKxPgr7mwpfs_1r2YiCiMU_Dkv4Mx87vWRkQSGSJXO96hVqJEkJ-aG9EkoKSHkN1tOOgfFcQNDiyYbbEYnF9t8hlTbKWbAsibruIhrfCFmAJVLq7Ean2Q94M";
+String apiKey, token, clientId, clientSecret;
 
 IPAddress staticIP(192, 168, 15, 47);
 IPAddress gateway(192, 168, 15, 1);
@@ -40,6 +37,57 @@ String makeFileName(String rawName) {
   String finalName = rawName.substring(9, 12) + "-" + rawName.substring(12, 14) + "-" + rawName.substring(14);
   finalName.toUpperCase();
   return finalName;
+}
+
+void refreshToken() {
+  http.begin("https://oauth2.googleapis.com/token");
+  http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+  
+  String ReqBody = "client_id=" + clientId;
+  ReqBody += "&client_secret=" + clientSecret;
+  ReqBody += "&refresh_token=" + token;
+  ReqBody += "&grant_type=refresh_token";
+ 
+  int httpResponseCode = http.POST(ReqBody);
+  
+  if(httpResponseCode>0){
+    String rawResponse = http.getString();
+  
+    Serial.print("Requisição para renovação do token de acesso enviada.\nCódigo de resposta: ");
+    Serial.println(httpResponseCode);
+    // Serial.println("Resposta recebida:\n" + rawResponse);
+    // Para receber o objeto JSON completo de resposta "descomentar" a linha acima
+    if(httpResponseCode == 200) {
+      const size_t capacity = JSON_OBJECT_SIZE(4) + 350;
+      DynamicJsonDocument parsedResponse(capacity);
+      deserializeJson(parsedResponse, rawResponse);
+      
+      const char* tokenChar = parsedResponse["access_token"];
+      token = String(tokenChar);
+      
+      jsonConfig["token"] = tokenChar;
+      String rawConfig = "";
+      serializeJsonPretty(jsonConfig, rawConfig);
+
+      config = SPIFFS.open("/config.txt", "w+");
+      if(config){
+        config.print(rawConfig);
+        config.close();
+        Serial.println("Token de acesso renovado");
+      }
+
+    } else {
+      StaticJsonDocument<105> parsedResponse;
+      deserializeJson(parsedResponse, rawResponse);
+
+      const char* error = parsedResponse["error_description"];
+      Serial.print("Erro: ");
+      Serial.println(error);
+    }
+  }else{
+    Serial.print("Erro ao enviar a requisição POST: ");
+    Serial.println(httpResponseCode);
+  }
 }
 
 void getErrorMessage(String rawResponse){
@@ -67,9 +115,8 @@ void updateFileOnGoogleDrive(String id, String data) {
   
     Serial.print("Requisição para atualização do arquivo no Google Drive enviada.\nCódigo de resposta: ");
     Serial.println(httpResponseCode);
-    // Serial.println("Resposta recebida:");
-    // Serial.println(rawResponse);
-    // Para receber o objeto JSON completo de resposta "descomentar" as duas linhas acima
+    // Serial.println("Resposta recebida:\n" + rawResponse);
+    // Para receber o objeto JSON completo de resposta "descomentar" a linha acima
 
     if(httpResponseCode == 200){
       Serial.println("Arquivo atualizado com sucesso!\n");
@@ -96,9 +143,8 @@ void createFileOnGoogleDrive(String name, String data) {
     String rawResponse = http.getString();
 
     Serial.println("Criação do arquivo " + name + " solicitada.\nCódigo de resposta: " + httpResponseCode);
-    // Serial.println("Resposta recebida:");
-    // Serial.println(rawResponse);
-    // Para receber o objeto JSON completo de resposta "descomentar" as duas linhas acima
+    // Serial.println("Resposta recebida:\n" + rawResponse);
+    // Para receber o objeto JSON completo de resposta "descomentar" a linha acima
 
     if(httpResponseCode == 200){
       Serial.println("Arquivo criado com sucesso!\n");
@@ -130,9 +176,8 @@ void searchFileOnGoogleDrive(String name, String dataToAppend) {
     String rawResponse = http.getString();
 
     Serial.println("Busca pelo arquivo " + name + " solicitada.\nCódigo de resposta: " + httpResponseCode);
-    // Serial.println("Resposta recebida:");
-    // Serial.println(rawResponse);
-    // Para receber o objeto JSON completo de resposta "descomentar" as duas linhas acima
+    // Serial.println("Resposta recebida:\n" + rawResponse);
+    // Para receber o objeto JSON completo de resposta "descomentar" a linha acima
 
     if(httpResponseCode == 200){
       const size_t capacity = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(2) + 90;
@@ -188,26 +233,41 @@ void searchFileOnGoogleDrive(String name, String dataToAppend) {
 }
 
 void setup(){
-// Inicialização de recursos, WiFi, comunicação serial e sistema de armazenamento de memória flash interna
-  if (WiFi.config(staticIP, gateway, subnet, dns1, dns2) == false) {
-    Serial.println("Configuration failed.");
-  }
-  WiFi.begin(ssid, password);
-
   Serial.begin(115200);
   Serial1.begin(9600, SERIAL_8N1, RXD2, TXD2);
   
   SPI.begin(18, 19, 23);
   
+  if (SPIFFS.begin()){
+    Serial.println("SPIFFS inicializado");
+  } else {
+    Serial.println("SPIFFS não inicializado");
+    return;
+  }
+  
   if (SD.begin(CS_PIN)) Serial.println("Cartão SD inicializado");
   else  Serial.println("Inicialização do cartão SD falhou");
 
-  if (SPIFFS.begin()){
-    Serial.println("SPIFFS iniciado");
-  } else {
-    Serial.println("SPIFFS não iniciado");
-    return;
+  config = SPIFFS.open("/config.txt", "r");
+  String rawConfig = "";
+  if(config){
+    while(config.available()){
+      rawConfig += char(config.read());
+    }
+    config.close();
   }
+
+  deserializeJson(jsonConfig, rawConfig);
+
+  // Credenciais da rede WiFi, nome da rede e senha
+  const char* ssid = jsonConfig["ssid"];
+  const char* password = jsonConfig["password"];
+
+  // Inicialização de recursos, WiFi, comunicação serial e sistema de armazenamento de memória flash interna
+  if (WiFi.config(staticIP, gateway, subnet, dns1, dns2) == false) {
+    Serial.println("Configuration failed.");
+  }
+  WiFi.begin(ssid, password);
 
 // Espera até que a rede esteja conectada
   while(WiFi.status()!=WL_CONNECTED) {
@@ -242,7 +302,7 @@ void setup(){
     dir.close();
     file.close();
     request->send(200, "text/plain", list);
-    });
+  });
 
   server.on("/download", HTTP_POST, [](AsyncWebServerRequest *request) {
     String fname = "/dados/";
@@ -250,10 +310,31 @@ void setup(){
     Serial.print("Download requisitado: "); // O nome de um argumento ainda pode ser verificado com a sintaxe request->argName(índice)
     Serial.println(fname);
     request->send(SD, fname, "text/csv", true);
-    });  
+  });
+
+  server.on("/google/auth", HTTP_GET, [](AsyncWebServerRequest *request) {
+    String code = request->arg("code");
     
-  server.begin();
+    request->send(200, "text/plain", "Código de autorização: " + code);
   
+  });
+
+  
+  const char* apiKeyChar = jsonConfig["api_key"];
+  apiKey = String(apiKeyChar);
+  
+  const char* tokenChar = jsonConfig["token"];
+  token = String(tokenChar);
+
+  const char* clientIdChar = jsonConfig["client_id"];
+  clientId = String(clientIdChar);
+  
+  const char* clientSecretChar = jsonConfig["client_secret"];
+  clientSecret = String(clientSecretChar);
+
+  server.begin();
+  //Serial.println("API KEY: " + apiKey + "\nTOKEN: " + token + "\nCLIENT ID: " + clientId + "\nCLIENT SECRET: " + clientSecret);
+  refreshToken();
 }
 
 void loop(void) {
