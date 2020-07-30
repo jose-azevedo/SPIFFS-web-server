@@ -21,9 +21,9 @@ String lineBuffer = "", fileToUpdate = "";
 File config, dayFile;
 int i = 0;
 
-StaticJsonDocument<475> jsonConfig;
+StaticJsonDocument<636> jsonConfig;
 
-String apiKey, token, clientId, clientSecret;
+String apiKey, accessToken, refreshToken, clientId, clientSecret;
 
 IPAddress staticIP(192, 168, 15, 47);
 IPAddress gateway(192, 168, 15, 1);
@@ -39,13 +39,67 @@ String makeFileName(String rawName) {
   return finalName;
 }
 
-void refreshToken() {
+void getAccessToken() {
+  http.begin("https://oauth2.googleapis.com/token");
+  http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+  
+  // Adicionar um código para conseguir um novo refresh token
+  String ReqBody = "code=";
+  ReqBody += "&client_id=" + clientId;
+  ReqBody += "&client_secret=" + clientSecret;
+  ReqBody += "&redirect_uri=http%3A//localhost:5000/google/auth";
+  ReqBody += "&grant_type=authorization_code";
+  ReqBody += "&prompt=consent";
+ 
+  int httpResponseCode = http.POST(ReqBody);
+  
+  if(httpResponseCode>0){
+    String rawResponse = http.getString();
+  
+    Serial.print("Requisição para adquirir tokens de renovação e de acesso enviada.\nCódigo de resposta: ");
+    Serial.println(httpResponseCode);
+    Serial.println("Resposta recebida:\n" + rawResponse);
+    // Para receber o objeto JSON completo de resposta "descomentar" a linha acima
+    if(httpResponseCode == 200) {
+      // const size_t capacity = JSON_OBJECT_SIZE(4) + 350;
+      // DynamicJsonDocument parsedResponse(capacity);
+      // deserializeJson(parsedResponse, rawResponse);
+      
+      // const char* tokenChar = parsedResponse["access_token"];
+      // token = String(tokenChar);
+      
+      // jsonConfig["token"] = tokenChar;
+      // String rawConfig = "";
+      // serializeJsonPretty(jsonConfig, rawConfig);
+
+      // config = SPIFFS.open("/config.json", "w+");
+      // if(config){
+      //   config.print(rawConfig);
+      //   config.close();
+      //   Serial.println("Token de acesso renovado\n");
+      // }
+
+    } else {
+      // StaticJsonDocument<128> parsedResponse;
+      // deserializeJson(parsedResponse, rawResponse);
+
+      // const char* error = parsedResponse["error_description"];
+      // Serial.print("Erro: ");
+      // Serial.println(error);
+    }
+  }else{
+    Serial.print("Erro ao enviar a requisição POST: ");
+    Serial.println(httpResponseCode);
+  }
+}
+
+void renewAccessToken() {
   http.begin("https://oauth2.googleapis.com/token");
   http.addHeader("Content-Type", "application/x-www-form-urlencoded");
   
   String ReqBody = "client_id=" + clientId;
   ReqBody += "&client_secret=" + clientSecret;
-  ReqBody += "&refresh_token=" + token;
+  ReqBody += "&refresh_token=" + refreshToken;
   ReqBody += "&grant_type=refresh_token";
  
   int httpResponseCode = http.POST(ReqBody);
@@ -55,29 +109,29 @@ void refreshToken() {
   
     Serial.print("Requisição para renovação do token de acesso enviada.\nCódigo de resposta: ");
     Serial.println(httpResponseCode);
-    // Serial.println("Resposta recebida:\n" + rawResponse);
+    Serial.println("Resposta recebida:\n" + rawResponse);
     // Para receber o objeto JSON completo de resposta "descomentar" a linha acima
     if(httpResponseCode == 200) {
       const size_t capacity = JSON_OBJECT_SIZE(4) + 350;
       DynamicJsonDocument parsedResponse(capacity);
       deserializeJson(parsedResponse, rawResponse);
       
-      const char* tokenChar = parsedResponse["access_token"];
-      token = String(tokenChar);
+      const char* accessTokenChar = parsedResponse["access_token"];
+      accessToken = String(accessTokenChar);
       
-      jsonConfig["token"] = tokenChar;
+      jsonConfig["access_token"] = accessTokenChar;
       String rawConfig = "";
       serializeJsonPretty(jsonConfig, rawConfig);
 
-      config = SPIFFS.open("/config.txt", "w+");
+      config = SPIFFS.open("/config.json", "w+");
       if(config){
         config.print(rawConfig);
         config.close();
-        Serial.println("Token de acesso renovado");
+        Serial.println("Token de acesso renovado\n");
       }
 
     } else {
-      StaticJsonDocument<105> parsedResponse;
+      StaticJsonDocument<128> parsedResponse;
       deserializeJson(parsedResponse, rawResponse);
 
       const char* error = parsedResponse["error_description"];
@@ -102,7 +156,7 @@ void getErrorMessage(String rawResponse){
 
 void updateFileOnGoogleDrive(String id, String data) {
   http.begin("https://sheets.googleapis.com/v4/spreadsheets/" + id + "/values/A1%3AJ1:append?valueInputOption=USER_ENTERED&key=" + apiKey);
-  http.addHeader("Authorization", "Bearer " + token);
+  http.addHeader("Authorization", "Bearer " + accessToken);
   http.addHeader("Content-Type", "application/json");
   http.addHeader("Accept", "application/json");
   
@@ -131,7 +185,7 @@ void updateFileOnGoogleDrive(String id, String data) {
 
 void createFileOnGoogleDrive(String name, String data) {
   http.begin("https://www.googleapis.com/drive/v3/files?key=" + apiKey);
-  http.addHeader("Authorization", "Bearer " + token);
+  http.addHeader("Authorization", "Bearer " + accessToken);
   http.addHeader("Content-Type", "application/json");
   http.addHeader("Accept", "application/json");
 
@@ -166,7 +220,7 @@ void createFileOnGoogleDrive(String name, String data) {
 
 void searchFileOnGoogleDrive(String name, String dataToAppend) {
   http.begin("https://www.googleapis.com/drive/v3/files?pageSize=10&q=name%3D'" + name + "'&fields=nextPageToken%2C%20files(id%2C%20name)&key=" + apiKey);
-  http.addHeader("Authorization", "Bearer " + token);
+  http.addHeader("Authorization", "Bearer " + accessToken);
   http.addHeader("Content-Type", "application/json");
   http.addHeader("Accept", "application/json");
 
@@ -248,7 +302,7 @@ void setup(){
   if (SD.begin(CS_PIN)) Serial.println("Cartão SD inicializado");
   else  Serial.println("Inicialização do cartão SD falhou");
 
-  config = SPIFFS.open("/config.txt", "r");
+  config = SPIFFS.open("/config.json", "r");
   String rawConfig = "";
   if(config){
     while(config.available()){
@@ -323,8 +377,11 @@ void setup(){
   const char* apiKeyChar = jsonConfig["api_key"];
   apiKey = String(apiKeyChar);
   
-  const char* tokenChar = jsonConfig["token"];
-  token = String(tokenChar);
+  const char* accessTokenChar = jsonConfig["access_token"];
+  accessToken = String(accessTokenChar);
+
+  const char* refreshTokenChar = jsonConfig["refresh_token"];
+  refreshToken = String(refreshTokenChar);
 
   const char* clientIdChar = jsonConfig["client_id"];
   clientId = String(clientIdChar);
@@ -334,7 +391,7 @@ void setup(){
 
   server.begin();
   //Serial.println("API KEY: " + apiKey + "\nTOKEN: " + token + "\nCLIENT ID: " + clientId + "\nCLIENT SECRET: " + clientSecret);
-  refreshToken();
+  renewAccessToken();
 }
 
 void loop(void) {

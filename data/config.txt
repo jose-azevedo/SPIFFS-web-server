@@ -1,8 +1,0 @@
-{
-    "ssid": "Azevedo",
-    "password": "familiaea",
-    "api_key": "AIzaSyDJwclO7HGCUvx7SXQzu1JjJG2HTXKHqaE",
-    "client_id":"75632227306-nmmdkusbgacllne2kjbagqpfrq8ebeko.apps.googleusercontent.com",
-    "client_secret":"3ZepUltJpBfBNT1nq9LAHnOz",
-    "token": "ya29.a0AfH6SMCM_GnvH27XkfGzlUJKrhskBJzO3XIdSlDPl47MlkOeoDeEwzwmy26GPaVuiTjNlGGf8wOiOil1XKRO-bz6N3eMskqkHXU_LXWjuwLZrDDRN0CLxEM00iYDXMuKUL28s4cg6pY9K90VELPcvT7BLgfb9-vTp6Vq"
-}
