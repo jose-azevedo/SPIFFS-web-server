@@ -14,7 +14,7 @@
 -Automatizar criação de diretórios no lado do Arduino [FEITO]
 
 04/07/2020
--Fazer uma função separada para enviar os dados do Arduino pro ESP32 
+-Fazer uma função separada para enviar os dados do Arduino pro ESP32 [FEITO]
 
-05/07/2020
--
+31/07/2020
+-Criar sistema de diretórios automatizados pro ESP32 e pro Google Drive

@@ -16,7 +16,7 @@
 #define stepADC 0.00481640625 // 4,932/1024
 #define M 10 // Total de valores para cálculo da média de valores instantâneos
 #define pinCS 53
-#define interval 1
+#define interval 2
 
 File data;
 
@@ -29,11 +29,11 @@ String linesToAppend = "";
 void createFile(void);
 void storeData(void);
 void accumulate(void);
-void accumulateClear(void);
+void clearCumulativeVariables(void);
 void clearVariables(void);
 void clearAverageVariables(void);
 
-int timeToSave = 0;
+int timeToSaveA = 0, timeToSaveB = 0;
 int acc = 0;
 
 char C = 'C';
@@ -335,12 +335,9 @@ void sendToESP32(){
   String messageBuffer = "<" + String(filePath) + "|" + linesToAppend + ">";
   Serial1.print(messageBuffer);
   linesToAppend = "";
-  Serial.println("Dados enviados para o ESP32");
+  Serial.println("Dados enviados para o ESP32:");
+  Serial.println(messageBuffer);
 }
-
-//String commaAsSeparator(float value){
-//  int 
-//}
 
 /*
   Função acumuladora.
@@ -361,26 +358,6 @@ void accumulate(){
     accFP[i] += FP[i];
   }
   acc++;
-}
-
-/*
-  Função limpadora de variáveis acumuladoras
-  A fim de se iniciar outra coleta de dados para outra integralização, as seguintes variáveis são zeradas.
-*/
-void accumulateClear(){
-  for (i=0; i<=1; i++) {  
-    acc_avgI_DC[i] = 0;
-    acc_avgV_DC[i] = 0;
-    acc_rmsI_DC[i] = 0;
-    acc_rmsV_DC[i] = 0;
-    acc_rmsI_AC[i] = 0;
-    acc_rmsV_AC[i] = 0;
-    accP_DC[i] = 0;
-    accP_AC[i] = 0; 
-    accS[i] = 0;
-    accFP[i] = 0; 
-  }
-  acc = 0;
 }
 
 /*
@@ -418,6 +395,26 @@ void clearAverageVariables(){
     
     FP[i] = 0;
   }
+}
+
+/*
+  Função limpadora de variáveis acumuladoras
+  A fim de se iniciar outra coleta de dados para outra integralização, as seguintes variáveis são zeradas.
+*/
+void clearCumulativeVariables(){
+  for (i=0; i<=1; i++) {  
+    acc_avgI_DC[i] = 0;
+    acc_avgV_DC[i] = 0;
+    acc_rmsI_DC[i] = 0;
+    acc_rmsV_DC[i] = 0;
+    acc_rmsI_AC[i] = 0;
+    acc_rmsV_AC[i] = 0;
+    accP_DC[i] = 0;
+    accP_AC[i] = 0; 
+    accS[i] = 0;
+    accFP[i] = 0; 
+  }
+  acc = 0;
 }
 
 void loop() {
@@ -589,20 +586,30 @@ void loop() {
       }
       
       tempo = rtc.getTime(); // Variável recebedora da informação de tempo
-      if (tempo.min > timeToSave) timeToSave = (tempo.min/interval + 1)*interval; // Os dados só são salvos em minutos múltiplos de 5
-      if (timeToSave > tempo.min + interval) timeToSave = 0; // Condição para reiniciar o ciclo quando min0 superar 55
-      if (tempo.min == timeToSave && x == 1){ // Salvar os dados após o tempo de espera e somente quando após os cálculos de AC2
+      if (tempo.min > timeToSaveA) timeToSaveA = (tempo.min/interval + 1)*interval; // Os dados só são salvos em minutos múltiplos de 5
+      if (timeToSaveA > tempo.min + interval) timeToSaveA = 0; // Condição para reiniciar o ciclo quando tempo.min superar 55
+      if (tempo.min == timeToSaveA && x == 1){ // Salvar os dados após o tempo de espera e somente quando após os cálculos de AC2
         Serial.println("Salvando dados...");
-        for (i=0; i<=1; i++){
-          createFile();  
-          storeData();
-          sendToESP32();
-          Serial.println("\n----------------------------------------------------------------\n");
-        }
-        accumulateClear();
-        timeToSave = timeToSave + interval;
+        i = 0;
+        createFile();  
+        storeData();
+        sendToESP32();
+        Serial.println("\n----------------------------------------------------------------\n");
+        
+        i = 1;
+        createFile();  
+        storeData();
+        
+        clearCumulativeVariables();
+        timeToSaveB = timeToSaveA + 1;
+        timeToSaveA = timeToSaveA + interval;
       }
-      
+      if (tempo.min == timeToSaveB && x == 1){
+        sendToESP32();
+        Serial.println("\n----------------------------------------------------------------\n");
+        timeToSaveB = timeToSaveB + interval;
+      }
+           
       digitalWrite(LED_BUILTIN, HIGH); // Acionamento do LED embutido para aferir o bom funcionamento do programa
       next();
       media = 0;
