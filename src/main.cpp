@@ -126,12 +126,11 @@ void getRefreshToken() {
   }
 }
 */
-void renewAccessToken() {
+void renewAccessToken(HTTPClient& http) {
   const char* clientId = jsonConfig["client_id"];
   const char* clientSecret = jsonConfig["client_secret"];
   const char* refreshToken = jsonConfig["refresh_token"];  
-  
-  HTTPClient http;
+
   http.begin("https://oauth2.googleapis.com/token");
   http.addHeader("Content-Type", "application/x-www-form-urlencoded");
   
@@ -196,8 +195,7 @@ void getErrorMessage(const String& rawResponse){
   Serial.println(error_message);
 }
 
-void updateFileOnGoogleDrive(const String& id, const String& data) {
-  HTTPClient http;
+void updateFileOnGoogleDrive(const String& id, const String& data, HTTPClient& http) {
   http.begin("https://sheets.googleapis.com/v4/spreadsheets/" + id + "/values/A1%3AJ1:append?valueInputOption=USER_ENTERED&key=" + apiKey);
   http.addHeader("Authorization", "Bearer " + accessToken);
   http.addHeader("Content-Type", "application/json");
@@ -221,8 +219,8 @@ void updateFileOnGoogleDrive(const String& id, const String& data) {
       Serial.println("Arquivo atualizado com sucesso!\n");
     } else if (httpResponseCode == 401) {
       Serial.println("Token expirado. Renovando token.\n");
-      renewAccessToken();
-      updateFileOnGoogleDrive(id, data);
+      renewAccessToken(http);
+      updateFileOnGoogleDrive(id, data, http);
     } else {
       getErrorMessage(rawResponse);
     }
@@ -231,13 +229,12 @@ void updateFileOnGoogleDrive(const String& id, const String& data) {
     Serial.println(httpResponseCode);
       if(httpResponseCode == -11){
       Serial.println("Tempo limite de resposta excedido. Repetindo operação...");
-      updateFileOnGoogleDrive(id, data);
+      updateFileOnGoogleDrive(id, data, http);
     }
   }
 }
 
-void createFileOnGoogleDrive(const String& name, const String& data) {
-  HTTPClient http;
+void createFileOnGoogleDrive(const String& name, const String& data, HTTPClient& http) {
   http.begin("https://www.googleapis.com/drive/v3/files?key=" + apiKey);
   http.addHeader("Authorization", "Bearer " + accessToken);
   http.addHeader("Content-Type", "application/json");
@@ -265,11 +262,11 @@ void createFileOnGoogleDrive(const String& name, const String& data) {
       deserializeJson(parsedResponse, rawResponse);
  
       String fileId = parsedResponse["id"];
-      updateFileOnGoogleDrive(fileId, data);
+      updateFileOnGoogleDrive(fileId, data, http);
     } else if (httpResponseCode == 401) {
       Serial.println("Token expirado. Renovando token.\n");
-      renewAccessToken();
-      createFileOnGoogleDrive(name, data);
+      renewAccessToken(http);
+      createFileOnGoogleDrive(name, data, http);
     } else {
       getErrorMessage(rawResponse);
     }
@@ -278,13 +275,12 @@ void createFileOnGoogleDrive(const String& name, const String& data) {
     Serial.println(httpResponseCode);
       if(httpResponseCode == -11){
       Serial.println("Tempo limite de resposta excedido. Repetindo operação...");
-      createFileOnGoogleDrive(name, data);
+      createFileOnGoogleDrive(name, data, http);
     }
   }
 }
 
-void searchFileOnGoogleDrive(const String& name, String& dataToAppend) {
-  HTTPClient http;
+void searchFileOnGoogleDrive(const String& name, String& dataToAppend, HTTPClient& http) {
   http.begin("https://www.googleapis.com/drive/v3/files?pageSize=10&q=name%3D'" + name + "'&fields=nextPageToken%2C%20files(id%2C%20name)&key=" + apiKey);
   http.addHeader("Authorization", "Bearer " + accessToken);
   http.addHeader("Content-Type", "application/json");
@@ -324,16 +320,16 @@ void searchFileOnGoogleDrive(const String& name, String& dataToAppend) {
         Serial.println("Arquivo encontrado - " + foundFile);
         Serial.println("ID do arquivo - " + foundId + "\n");
 
-        updateFileOnGoogleDrive(foundId, dataToAppend);
+        updateFileOnGoogleDrive(foundId, dataToAppend, http);
       } else {
         Serial.println("Nenhum arquivo encontrado\n");
 
-        createFileOnGoogleDrive(name, dataToAppend);
+        createFileOnGoogleDrive(name, dataToAppend, http);
       }
     } else if (httpResponseCode == 401) {
       Serial.println("Token expirado. Renovando token.\n");
-      renewAccessToken();
-      searchFileOnGoogleDrive(name, dataToAppend);
+      renewAccessToken(http);
+      searchFileOnGoogleDrive(name, dataToAppend, http);
     } else {
       getErrorMessage(rawResponse);
     }
@@ -342,7 +338,7 @@ void searchFileOnGoogleDrive(const String& name, String& dataToAppend) {
     Serial.println(httpResponseCode);
     if(httpResponseCode == -11){
       Serial.println("Tempo limite de resposta excedido. Repetindo operação...");
-      searchFileOnGoogleDrive(name, dataToAppend);
+      searchFileOnGoogleDrive(name, dataToAppend, http);
     }
   }
 }
@@ -460,8 +456,9 @@ void loop(void) {
         Serial.println("Arquivo local não abriu\n");
       }
 
+      HTTPClient http;
       Serial.println("Enviando dados para o Google Drive.\n");
-      searchFileOnGoogleDrive(fileToUpdate, lineBuffer);
+      searchFileOnGoogleDrive(fileToUpdate, lineBuffer, http);
 
       lineBuffer = "";
       saveFlag = false;

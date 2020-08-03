@@ -18,3 +18,8 @@
 
 31/07/2020
 -Criar sistema de diretórios automatizados pro ESP32 e pro Google Drive
+
+04/08/2020
+-Verificar erro:
+[E][WiFiGeneric.cpp:654] hostByName(): DNS Failed for www.googleapis.com
+[E][WiFiClientSecure.cpp:132] connect(): start_ssl_client: -1
