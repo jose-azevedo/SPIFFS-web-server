@@ -16,7 +16,7 @@
 #define stepADC 0.00481640625 // 4,932/1024
 #define M 10 // Total de valores para cálculo da média de valores instantâneos
 #define pinCS 53
-#define interval 2
+#define interval 5
 
 File data;
 

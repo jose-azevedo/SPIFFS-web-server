@@ -13,7 +13,6 @@
 #define httpPort 8008
 
 AsyncWebServer server(httpPort);
-HTTPClient http;
 
 bool saveFlag = false, endFlag = false, startFlag = false;
 char myChar;
@@ -81,7 +80,7 @@ void parseRecievedData(String* data) {
     *data = "[[" + HeaderAndTime + values + "]]";
   }
 }
-
+/*
 void getRefreshToken() {
   const char* clientId = jsonConfig["client_id"];
   const char* clientSecret = jsonConfig["client_secret"];
@@ -100,10 +99,11 @@ void getRefreshToken() {
   ReqBody += "&prompt=consent";
  
   int httpResponseCode = http.POST(ReqBody);
-  
+  String rawResponse = http.getString();
+
+  http.end();
   if(httpResponseCode>0){
-    String rawResponse = http.getString();
-  
+    
     Serial.print("Requisição para adquirir tokens de renovação e de acesso enviada.\nCódigo de resposta: ");
     Serial.println(httpResponseCode);
     // Serial.println("Resposta recebida:\n" + rawResponse);
@@ -125,12 +125,13 @@ void getRefreshToken() {
     Serial.println(httpResponseCode);
   }
 }
-
+*/
 void renewAccessToken() {
   const char* clientId = jsonConfig["client_id"];
   const char* clientSecret = jsonConfig["client_secret"];
   const char* refreshToken = jsonConfig["refresh_token"];  
   
+  HTTPClient http;
   http.begin("https://oauth2.googleapis.com/token");
   http.addHeader("Content-Type", "application/x-www-form-urlencoded");
   
@@ -143,13 +144,13 @@ void renewAccessToken() {
   ReqBody += "&refresh_token=";
   ReqBody += refreshToken;
   ReqBody += "&grant_type=refresh_token";
-  
  
   int httpResponseCode = http.POST(ReqBody);
-  
+  String rawResponse = http.getString();
+
+  http.end();
   if(httpResponseCode>0){
-    String rawResponse = http.getString();
-  
+    
     Serial.print("Requisição para renovação do token de acesso enviada.\nCódigo de resposta: ");
     Serial.println(httpResponseCode);
     // Serial.println("Resposta recebida:\n" + rawResponse);
@@ -180,7 +181,7 @@ void renewAccessToken() {
       Serial.print("Erro: ");
       Serial.println(error);
     }
-  }else{
+  } else {
     Serial.print("Erro ao enviar a requisição POST: ");
     Serial.println(httpResponseCode);
   }
@@ -196,6 +197,7 @@ void getErrorMessage(const String& rawResponse){
 }
 
 void updateFileOnGoogleDrive(const String& id, const String& data) {
+  HTTPClient http;
   http.begin("https://sheets.googleapis.com/v4/spreadsheets/" + id + "/values/A1%3AJ1:append?valueInputOption=USER_ENTERED&key=" + apiKey);
   http.addHeader("Authorization", "Bearer " + accessToken);
   http.addHeader("Content-Type", "application/json");
@@ -207,8 +209,10 @@ void updateFileOnGoogleDrive(const String& id, const String& data) {
   int httpResponseCode = http.POST(JSONReqBody);
   
   Serial.printf("Requisição para atualização do arquivo no Google Drive enviada.\nCódigo de resposta: %i\n", httpResponseCode);
+  String rawResponse = http.getString();
+
+  http.end();
   if(httpResponseCode>0){
-    String rawResponse = http.getString();
   
     // Serial.println("Resposta recebida:\n" + rawResponse);
     // Para receber o objeto JSON completo de resposta "descomentar" a linha acima
@@ -233,6 +237,7 @@ void updateFileOnGoogleDrive(const String& id, const String& data) {
 }
 
 void createFileOnGoogleDrive(const String& name, const String& data) {
+  HTTPClient http;
   http.begin("https://www.googleapis.com/drive/v3/files?key=" + apiKey);
   http.addHeader("Authorization", "Bearer " + accessToken);
   http.addHeader("Content-Type", "application/json");
@@ -245,8 +250,10 @@ void createFileOnGoogleDrive(const String& name, const String& data) {
 
   Serial.println("Criação do arquivo " + name + " solicitada.\nCódigo de resposta: " + httpResponseCode);
 
+  String rawResponse = http.getString();
+
+  http.end();
   if(httpResponseCode>0){
-    String rawResponse = http.getString();
 
     // Serial.println("Resposta recebida:\n" + rawResponse);
     // Para receber o objeto JSON completo de resposta "descomentar" a linha acima
@@ -266,7 +273,7 @@ void createFileOnGoogleDrive(const String& name, const String& data) {
     } else {
       getErrorMessage(rawResponse);
     }
-  }else{
+  } else {
     Serial.print("Erro ao enviar a requisição POST: ");
     Serial.println(httpResponseCode);
       if(httpResponseCode == -11){
@@ -277,6 +284,7 @@ void createFileOnGoogleDrive(const String& name, const String& data) {
 }
 
 void searchFileOnGoogleDrive(const String& name, String& dataToAppend) {
+  HTTPClient http;
   http.begin("https://www.googleapis.com/drive/v3/files?pageSize=10&q=name%3D'" + name + "'&fields=nextPageToken%2C%20files(id%2C%20name)&key=" + apiKey);
   http.addHeader("Authorization", "Bearer " + accessToken);
   http.addHeader("Content-Type", "application/json");
@@ -292,12 +300,14 @@ void searchFileOnGoogleDrive(const String& name, String& dataToAppend) {
   Serial.printf("Código de resposta: %i\n", httpResponseCode);
   Serial.printf("Tempo de resposta do servidor: %i\n", end-start);
 
+  String rawResponse = http.getString();
+
+  http.end();
   if(httpResponseCode>0){
-    String rawResponse = http.getString();
-    
+
     // Serial.println("Resposta recebida:\n" + rawResponse);
     // Para receber o objeto JSON completo de resposta "descomentar" a linha acima
-    
+
     if(httpResponseCode == 200){
       StaticJsonDocument<150> parsedResponse;
       deserializeJson(parsedResponse, rawResponse);
@@ -449,7 +459,7 @@ void loop(void) {
       } else {
         Serial.println("Arquivo local não abriu\n");
       }
-      
+
       Serial.println("Enviando dados para o Google Drive.\n");
       searchFileOnGoogleDrive(fileToUpdate, lineBuffer);
 
