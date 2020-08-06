@@ -13,7 +13,7 @@
 #define httpPort 8008
 
 AsyncWebServer server(httpPort);
-
+int tryAgain = 0;
 bool saveFlag = false, endFlag = false, startFlag = false;
 char myChar;
 String lineBuffer = "", fileToUpdate = "";
@@ -149,7 +149,8 @@ void renewAccessToken(HTTPClient& http) {
 
   http.end();
   if(httpResponseCode>0){
-    
+    tryAgain = 0;
+
     Serial.print("Requisição para renovação do token de acesso enviada.\nCódigo de resposta: ");
     Serial.println(httpResponseCode);
     // Serial.println("Resposta recebida:\n" + rawResponse);
@@ -181,8 +182,14 @@ void renewAccessToken(HTTPClient& http) {
       Serial.println(error);
     }
   } else {
-    Serial.print("Erro ao enviar a requisição POST: ");
-    Serial.println(httpResponseCode);
+    tryAgain++;
+    if(tryAgain <= 1) {
+      Serial.println("Erro ao enviar a requisição. Tentando novamente...\n");
+      renewAccessToken(http);
+      tryAgain = 0;
+    } else {
+      Serial.println("Impossível realizar operação, continuando fluxo do programa.\n");
+    }
   }
 }
 
@@ -211,7 +218,8 @@ void updateFileOnGoogleDrive(const String& id, const String& data, HTTPClient& h
 
   http.end();
   if(httpResponseCode>0){
-  
+    tryAgain = 0;
+
     // Serial.println("Resposta recebida:\n" + rawResponse);
     // Para receber o objeto JSON completo de resposta "descomentar" a linha acima
 
@@ -224,12 +232,14 @@ void updateFileOnGoogleDrive(const String& id, const String& data, HTTPClient& h
     } else {
       getErrorMessage(rawResponse);
     }
-  }else{
-    Serial.print("Erro ao enviar a requisição POST: ");
-    Serial.println(httpResponseCode);
-      if(httpResponseCode == -11){
-      Serial.println("Tempo limite de resposta excedido. Repetindo operação...");
+  } else {
+    tryAgain++;
+    if(tryAgain <= 1) {
+      Serial.println("Erro ao enviar a requisição. Tentando novamente...\n");
       updateFileOnGoogleDrive(id, data, http);
+      tryAgain = 0;
+    } else {
+      Serial.println("Impossível realizar operação, continuando fluxo do programa.\n");
     }
   }
 }
@@ -251,7 +261,7 @@ void createFileOnGoogleDrive(const String& name, const String& data, HTTPClient&
 
   http.end();
   if(httpResponseCode>0){
-
+    tryAgain = 0;
     // Serial.println("Resposta recebida:\n" + rawResponse);
     // Para receber o objeto JSON completo de resposta "descomentar" a linha acima
 
@@ -271,11 +281,13 @@ void createFileOnGoogleDrive(const String& name, const String& data, HTTPClient&
       getErrorMessage(rawResponse);
     }
   } else {
-    Serial.print("Erro ao enviar a requisição POST: ");
-    Serial.println(httpResponseCode);
-      if(httpResponseCode == -11){
-      Serial.println("Tempo limite de resposta excedido. Repetindo operação...");
+    tryAgain++;
+    if(tryAgain <= 1) {
+      Serial.println("Erro ao enviar a requisição. Tentando novamente...\n");
       createFileOnGoogleDrive(name, data, http);
+      tryAgain = 0;
+    } else {
+      Serial.println("Impossível realizar operação, continuando fluxo do programa.\n");
     }
   }
 }
@@ -297,14 +309,15 @@ void searchFileOnGoogleDrive(const String& name, String dataToAppend, HTTPClient
   Serial.printf("Tempo de resposta do servidor: %i\n", end-start);
 
   String rawResponse = http.getString();
-
+  
   http.end();
   if(httpResponseCode>0){
-
+    tryAgain = 0;
     // Serial.println("Resposta recebida:\n" + rawResponse);
     // Para receber o objeto JSON completo de resposta "descomentar" a linha acima
 
     if(httpResponseCode == 200){
+      
       StaticJsonDocument<150> parsedResponse;
       deserializeJson(parsedResponse, rawResponse);
       
@@ -334,11 +347,13 @@ void searchFileOnGoogleDrive(const String& name, String dataToAppend, HTTPClient
       getErrorMessage(rawResponse);
     }
   } else {
-    Serial.print("Erro ao enviar a requisição POST: ");
-    Serial.println(httpResponseCode);
-    if(httpResponseCode == -11){
-      Serial.println("Tempo limite de resposta excedido. Repetindo operação...");
+    tryAgain++;
+    if(tryAgain <= 1) {
+      Serial.println("Erro ao enviar a requisição. Tentando novamente...\n");
       searchFileOnGoogleDrive(name, dataToAppend, http);
+      tryAgain = 0;
+    } else {
+      Serial.println("Impossível realizar operação, continuando fluxo do programa.\n");
     }
   }
 }
