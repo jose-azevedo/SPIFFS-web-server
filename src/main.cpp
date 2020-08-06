@@ -170,7 +170,7 @@ void renewAccessToken(HTTPClient& http) {
       if(config){
         config.print(rawConfig);
         config.close();
-        Serial.println("Token de acesso renovado\n");
+        Serial.println("Token de acesso renovado!\n");
       }
 
     } else {
@@ -300,13 +300,10 @@ void searchFileOnGoogleDrive(const String& name, String dataToAppend, HTTPClient
 
   http.setTimeout(15000);
 
-  int start = millis();
   int httpResponseCode = http.GET();
-  int end = millis();
 
   Serial.println("Busca pelo arquivo " + name + " solicitada.");
   Serial.printf("Código de resposta: %i\n", httpResponseCode);
-  Serial.printf("Tempo de resposta do servidor: %i\n", end-start);
 
   String rawResponse = http.getString();
   
