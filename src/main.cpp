@@ -280,7 +280,7 @@ void createFileOnGoogleDrive(const String& name, const String& data, HTTPClient&
   }
 }
 
-void searchFileOnGoogleDrive(const String& name, String& dataToAppend, HTTPClient& http) {
+void searchFileOnGoogleDrive(const String& name, String dataToAppend, HTTPClient& http) {
   http.begin("https://www.googleapis.com/drive/v3/files?pageSize=10&q=name%3D'" + name + "'&fields=nextPageToken%2C%20files(id%2C%20name)&key=" + apiKey);
   http.addHeader("Authorization", "Bearer " + accessToken);
   http.addHeader("Content-Type", "application/json");
