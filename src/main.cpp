@@ -11,6 +11,7 @@
 #define TXD2 17
 #define CS_PIN 4
 #define httpPort 8008
+#define MAXIMUM_ATTEMPTS 2
 
 AsyncWebServer server(httpPort);
 int tryAgain = 0;
@@ -183,7 +184,7 @@ void renewAccessToken(HTTPClient& http) {
     }
   } else {
     tryAgain++;
-    if(tryAgain <= 1) {
+    if(tryAgain <= MAXIMUM_ATTEMPTS) {
       Serial.println("Erro ao enviar a requisição. Tentando novamente...\n");
       renewAccessToken(http);
       tryAgain = 0;
@@ -234,7 +235,7 @@ void updateFileOnGoogleDrive(const String& id, const String& data, HTTPClient& h
     }
   } else {
     tryAgain++;
-    if(tryAgain <= 1) {
+    if(tryAgain <= MAXIMUM_ATTEMPTS) {
       Serial.println("Erro ao enviar a requisição. Tentando novamente...\n");
       updateFileOnGoogleDrive(id, data, http);
       tryAgain = 0;
@@ -282,7 +283,7 @@ void createFileOnGoogleDrive(const String& name, const String& data, HTTPClient&
     }
   } else {
     tryAgain++;
-    if(tryAgain <= 1) {
+    if(tryAgain <= MAXIMUM_ATTEMPTS) {
       Serial.println("Erro ao enviar a requisição. Tentando novamente...\n");
       createFileOnGoogleDrive(name, data, http);
       tryAgain = 0;
@@ -345,7 +346,7 @@ void searchFileOnGoogleDrive(const String& name, String dataToAppend, HTTPClient
     }
   } else {
     tryAgain++;
-    if(tryAgain <= 1) {
+    if(tryAgain <= MAXIMUM_ATTEMPTS) {
       Serial.println("Erro ao enviar a requisição. Tentando novamente...\n");
       searchFileOnGoogleDrive(name, dataToAppend, http);
       tryAgain = 0;
