@@ -189,6 +189,7 @@ void renewAccessToken(HTTPClient& http) {
     tryAgain++;
     if(tryAgain <= MAXIMUM_ATTEMPTS) {
       Serial.println("Erro ao enviar a requisição. Tentando novamente...\n");
+      delay(3000);
       renewAccessToken(http);
       tryAgain = 0;
     } else {
@@ -231,6 +232,7 @@ void updateFileOnGoogleDrive(const String& fileId, const String& dataToSend, HTT
     tryAgain++;
     if(tryAgain <= MAXIMUM_ATTEMPTS) {
       Serial.println("Erro ao enviar a requisição. Tentando novamente...\n");
+      delay(3000);
       updateFileOnGoogleDrive(fileId, dataToSend, http);
       tryAgain = 0;
     } else {
@@ -279,6 +281,7 @@ void createFileOnGoogleDrive(const String& fileName, const String& dataToSend, H
     tryAgain++;
     if(tryAgain <= MAXIMUM_ATTEMPTS) {
       Serial.println("Erro ao enviar a requisição. Tentando novamente...\n");
+      delay(3000);
       createFileOnGoogleDrive(fileName, dataToSend, http);
       tryAgain = 0;
     } else {
@@ -342,6 +345,7 @@ void searchFileOnGoogleDrive(const String& fileName, String dataToSend, HTTPClie
     tryAgain++;
     if(tryAgain <= MAXIMUM_ATTEMPTS) {
       Serial.println("Erro ao enviar a requisição. Tentando novamente...\n");
+      delay(3000);
       searchFileOnGoogleDrive(fileName, dataToSend, http);
       tryAgain = 0;
     } else {
