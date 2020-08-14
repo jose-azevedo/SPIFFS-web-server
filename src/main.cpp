@@ -14,7 +14,7 @@
 #define MAXIMUM_ATTEMPTS 2
 
 int i = 0, tryAgain = 0;
-char recievedChar;
+char receivedChar;
 bool saveFlag = false, endFlag = false, startFlag = false;
 
 String messageBuffer = "", fileToUpdate = "";
@@ -32,8 +32,8 @@ IPAddress subnet(255, 255, 255, 0);
 IPAddress dns1(192, 168, 15, 1);
 IPAddress dns2(200, 175, 89, 139);
 
-String formatFileName(String rawName) {
-  String finalName = rawName.substring(9, 12) + "-" + rawName.substring(12, 14) + "-20" + rawName.substring(14, 16);
+String formatFileName(String rawFileName) {
+  String finalName = rawFileName.substring(9, 12) + "-" + rawFileName.substring(12, 14) + "-20" + rawFileName.substring(14, 16);
   finalName.toUpperCase();
   return finalName;
 }
@@ -452,9 +452,9 @@ void setup(){
 void loop(void) {
   while(Serial1.available() > 0){
 
-    recievedChar = char(Serial1.read());
+    receivedChar = char(Serial1.read());
 
-    if (recievedChar == '>') {
+    if (receivedChar == '>') {
       fileToUpdate = formatFileName(fileToUpdate);
       dayFile = SD.open("/dados/" + fileToUpdate + ".csv", "a");
 
@@ -476,14 +476,14 @@ void loop(void) {
       endFlag = true;
       Serial.println("------------------------------------------------------------------\n");
     } 
-    else if (recievedChar == '|'){
+    else if (receivedChar == '|'){
       fileToUpdate =  messageBuffer;
       messageBuffer = "";
     }
     else if (saveFlag) {
-      messageBuffer += recievedChar;
+      messageBuffer += receivedChar;
     }  
-    else if (recievedChar == '<') {
+    else if (receivedChar == '<') {
       saveFlag = true;
     }
   }
