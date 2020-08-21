@@ -32,6 +32,22 @@ IPAddress subnet(255, 255, 255, 0);
 IPAddress dns1(192, 168, 15, 1);
 IPAddress dns2(200, 175, 89, 139);
 
+String createDirectory(String rawFileName) {
+  String year = rawFileName.substring(0, 4);
+  String month = rawFileName.substring(5, 8);
+  String directory = "/" + year + "/" + month + "/";
+  if(SD.mkdir("/" + year)) {
+    if(SD.mkdir("/" + year + "/" + month)) {
+      Serial.println("Diretório " + directory + " criado com sucesso");
+    } else {
+      Serial.println("Erro ao criar diretório de mês\n");
+    }
+  } else {
+    Serial.printf("Erro ao criar diretório de ano\n");
+  }
+  return directory;
+}
+
 String formatFileName(String rawFileName) {
   String finalName = rawFileName.substring(9, 12) + "-" + rawFileName.substring(12, 14) + "-20" + rawFileName.substring(14, 16);
   finalName.toUpperCase();
@@ -455,13 +471,14 @@ void loop(void) {
     receivedChar = char(Serial1.read());
 
     if (receivedChar == '>') {
+      String directory = createDirectory(fileToUpdate);
       fileToUpdate = formatFileName(fileToUpdate);
-      dayFile = SD.open("/dados/" + fileToUpdate + ".csv", "a");
+      dayFile = SD.open(directory + fileToUpdate + ".csv", "a");
 
       if(dayFile){
         dayFile.println(messageBuffer);
         dayFile.close();
-        Serial.println("Arquivo local atualizado: " + fileToUpdate);
+        Serial.println("Arquivo local atualizado: " + directory + fileToUpdate);
         Serial.println("Conteúdo adicionado:\n" + messageBuffer + "\n");
       } else {
         Serial.println("Arquivo local não abriu\n");
