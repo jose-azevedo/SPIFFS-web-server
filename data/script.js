@@ -1,15 +1,14 @@
 window.onload = function() {listYears()};
 
 function listYears () {
-  var yearsTable = document.getElementById('years-table');
+  const yearsTable = document.getElementById('years-table');
   var yearsCells = document.getElementById('years-cells');
   yearsCells.remove();
   yearsCells = document.createElement('tbody');
   yearsCells.setAttribute('id', 'years-cells');
   yearsTable.appendChild(yearsCells);
 
-  var xml;
-  xml = new XMLHttpRequest();
+  const xml = new XMLHttpRequest();
   xml.open('GET', 'listYears', true);
   xml.onreadystatechange = function () {
     if ((xml.readyState==4) && (xml.status==200)) {
@@ -36,15 +35,14 @@ function listYears () {
 }
 
 function listMonths (year) {
-  var monthsTable = document.getElementById('months-table');
+  const monthsTable = document.getElementById('months-table');
   var monthsCells = document.getElementById('months-cells');
   monthsCells.remove();
   monthsCells = document.createElement('tbody');
   monthsCells.setAttribute('id', 'months-cells');
   monthsTable.appendChild(monthsCells);
 
-  var xml;
-  xml = new XMLHttpRequest();
+  const xml = new XMLHttpRequest();
   xml.open('GET', 'listMonths?year=' + year, true);
   xml.onreadystatechange = function () {
     if ((xml.readyState==4) && (xml.status==200)) {
@@ -137,22 +135,21 @@ function listMonths (year) {
 }
 
 function listFiles(month) {
+  const filesTable = document.getElementById('files-table');
   var filesCells = document.getElementById('file-cells');
-  var filesTable = document.getElementById('files-table');
   filesCells.remove();
   filesCells = document.createElement('tbody');
   filesCells.setAttribute('id', 'file-cells');
   filesTable.appendChild(filesCells);
 
-  var xml;
-  xml = new XMLHttpRequest();
+  const xml = new XMLHttpRequest();
   xml.open('GET', 'listFiles?month=' + month, true); // Requisição HTTP do tipo GET na path "/listFiles" do servidor
   xml.onreadystatechange = function () {
     if ((xml.readyState==4) && (xml.status==200)) { // Quando receber um OK do servidor e a lista bruta, inicia o processamento da lista
       
-      var rawFileLists = xml.responseText; // Recebe a lista bruta de todos os arquivos em uma única string separados por um "|"
+      const rawFileLists = xml.responseText; // Recebe a lista bruta de todos os arquivos em uma única string separados por um "|"
       
-      var fileLists = formatFileLists(rawFileLists) // Função recebe a lista bruta e retorna um objeto com as propriedades relativas a lista de cada gerador 
+      const fileLists = formatFileLists(rawFileLists) // Função recebe a lista bruta e retorna um objeto com as propriedades relativas a lista de cada gerador 
 
       for (const i in fileLists) { // Laço se repete enquanto houverem elementos nos vetores
         for (const j in fileLists[i]) {
@@ -178,7 +175,7 @@ function listFiles(month) {
 
 function formatFileLists (rawFileLists) {
 
-  var arrayList = rawFileLists.split("|"); // Divide a string em um vetor de strings separando os elementos pelo caracter "|". Agora cada elemento deste vetor é o nome de um arquivo
+  const arrayList = rawFileLists.split("|"); // Divide a string em um vetor de strings separando os elementos pelo caracter "|". Agora cada elemento deste vetor é o nome de um arquivo
   arrayList.sort();
   var fileListA = []; // Vetores que receberão os nomes dos arquivos relativos ao seu gerador
   var fileListB = [];
@@ -186,7 +183,7 @@ function formatFileLists (rawFileLists) {
   var fileListD = [];
   var gen; // Variável que recebe o prefíxo do nome do arquivo que possibilita a distinção entre geradores
 
-  for (var i in arrayList){
+  for (const i in arrayList){
     gen = arrayList[i].slice(10, 11) // Variável recebe o prefixo contido nos 8 primeiros caracteres
     // Condicional switch para atribuir à última posição de cada vetor o nome de arquivo correspondente ao seu gerador, sem o prefíxo de diretório
     switch (gen) {
@@ -214,11 +211,10 @@ function formatFileLists (rawFileLists) {
 }
 
 function downloadFile (filePath) {
-  var xml = new XMLHttpRequest;
+  const xml = new XMLHttpRequest;
   xml.open('GET', 'downloadFile?filePath=' + filePath, true);
   xml.onreadystatechange = function () {
     if ((xml.readyState==4) && (xml.status==200)) {
-      console.log(xml.responseText);
       const a = document.createElement('a');
       a.style.display = 'none';
       document.body.appendChild(a);
