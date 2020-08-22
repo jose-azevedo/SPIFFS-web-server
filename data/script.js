@@ -154,31 +154,21 @@ function listFiles(month) {
       
       var fileLists = formatFileLists(rawFileLists) // Função recebe a lista bruta e retorna um objeto com as propriedades relativas a lista de cada gerador 
 
-      for (const i in fileLists.A) { // Laço se repete enquanto houverem elementos nos vetores
-        var newRow = document.createElement('tr') // Criação de uma nova linha na tabela
-        filesCells.appendChild(newRow) // Anexação da nova linha ao corpo da tabela
+      for (const i in fileLists) { // Laço se repete enquanto houverem elementos nos vetores
+        for (const j in fileLists[i]) {
 
-        var newCellA = document.createElement('td') // Criação de uma nova célula
-        var newCellB = document.createElement('td')
-        var newCellC = document.createElement('td')
-        var newCellD = document.createElement('td')
+          var fileRow = document.getElementById(`file-row-${j}`)
+          if (fileRow == null) {
+            fileRow = document.createElement('tr');
+            fileRow.setAttribute('id', `file-row-${j}`);
+            filesCells.appendChild(fileRow);
+          }
 
-        newRow.appendChild(newCellA) // Anexação da célula
-        newRow.appendChild(newCellB)
-        newRow.appendChild(newCellC)
-        newRow.appendChild(newCellD)
-
-        // O texto da célula é definido como igual ao do elemento no vetor
-        newCellA.innerHTML = fileLists.A[i].substring(10);
-        newCellB.innerHTML = fileLists.B[i].substring(10);
-        newCellC.innerHTML = fileLists.C[i];
-        newCellD.innerHTML = fileLists.D[i];
-
-        // Define-se que ao clicar na célula o seu texto, nome do arquivo, seja copiado para a caixa de texto do elemento Formulário. É preciso que isso seja feito para comunicar ao servidor qual o nome do arquivo se deseja baixar quando o formulário for enviado.
-        newCellA.setAttribute('onclick', `downloadFile('${fileLists.A[i]}')`);
-        newCellB.setAttribute('onclick', `downloadFile('${fileLists.B[i]}')`);
-        newCellC.setAttribute('onclick', `downloadFile('${fileLists.C[i]}')`);
-        newCellD.setAttribute('onclick', `downloadFile('${fileLists.D[i]}')`);
+          const fileCell = document.createElement('td');
+          fileCell.innerHTML = fileLists[i][j].substring(10);
+          fileCell.setAttribute('onclick', `downloadFile('${fileLists[i][j]}')`);
+          fileRow.appendChild(fileCell)
+        }
       }
       filesTable.style.display = 'table';
     }
@@ -215,12 +205,12 @@ function formatFileLists (rawFileLists) {
     }
   }
 
-  return { // retorna um objeto com as 4 propriedades sendo vetores relativos a lista de arquivos de cada gerador
-    A: fileListA,
-    B: fileListB,
-    C: fileListC,
-    D: fileListD
-  }
+  return [ // retorna um objeto com as 4 propriedades sendo vetores relativos a lista de arquivos de cada gerador
+    fileListA,
+    fileListB,
+    fileListC,
+    fileListD
+  ]
 }
 
 function downloadFile (filePath) {
