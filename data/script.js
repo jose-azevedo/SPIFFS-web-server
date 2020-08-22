@@ -150,11 +150,11 @@ function listFiles(month) {
   xml.onreadystatechange = function () {
     if ((xml.readyState==4) && (xml.status==200)) { // Quando receber um OK do servidor e a lista bruta, inicia o processamento da lista
       
-      var listString = xml.responseText; // Recebe a lista bruta de todos os arquivos em uma única string separados por um "|"
+      var rawFileLists = xml.responseText; // Recebe a lista bruta de todos os arquivos em uma única string separados por um "|"
       
-      var dataList = mkList(listString) // Função recebe a lista bruta e retorna um objeto com as propriedades relativas a lista de cada gerador 
+      var fileLists = formatFileLists(rawFileLists) // Função recebe a lista bruta e retorna um objeto com as propriedades relativas a lista de cada gerador 
 
-      for (const i in dataList.A) { // Laço se repete enquanto houverem elementos nos vetores
+      for (const i in fileLists.A) { // Laço se repete enquanto houverem elementos nos vetores
         var newRow = document.createElement('tr') // Criação de uma nova linha na tabela
         filesCells.appendChild(newRow) // Anexação da nova linha ao corpo da tabela
 
@@ -163,27 +163,22 @@ function listFiles(month) {
         var newCellC = document.createElement('td')
         var newCellD = document.createElement('td')
 
-        newCellA.setAttribute('class', 'cellA') // Definição do atributo classe do elemento célula
-        newCellB.setAttribute('class', 'cellB') // Passo importante para garantir que cada arquivo fique em seu devido lugar
-        newCellC.setAttribute('class', 'cellC')
-        newCellD.setAttribute('class', 'cellD')
-
         newRow.appendChild(newCellA) // Anexação da célula
         newRow.appendChild(newCellB)
         newRow.appendChild(newCellC)
         newRow.appendChild(newCellD)
 
         // O texto da célula é definido como igual ao do elemento no vetor
-        document.getElementsByClassName('cellA')[i].innerHTML = dataList.A[i] 
-        document.getElementsByClassName('cellB')[i].innerHTML = dataList.B[i]
-        document.getElementsByClassName('cellC')[i].innerHTML = dataList.C[i]
-        document.getElementsByClassName('cellD')[i].innerHTML = dataList.D[i]
+        newCellA.innerHTML = fileLists.A[i].substring(10);
+        newCellB.innerHTML = fileLists.B[i].substring(10);
+        newCellC.innerHTML = fileLists.C[i];
+        newCellD.innerHTML = fileLists.D[i];
 
         // Define-se que ao clicar na célula o seu texto, nome do arquivo, seja copiado para a caixa de texto do elemento Formulário. É preciso que isso seja feito para comunicar ao servidor qual o nome do arquivo se deseja baixar quando o formulário for enviado.
-        newCellA.setAttribute('onclick', `downloadFile('${dataList.A[i]}')`);
-        newCellB.setAttribute('onclick', `downloadFile('${dataList.B[i]}')`);
-        newCellC.setAttribute('onclick', `downloadFile('${dataList.C[i]}')`);
-        newCellD.setAttribute('onclick', `downloadFile('${dataList.D[i]}')`);
+        newCellA.setAttribute('onclick', `downloadFile('${fileLists.A[i]}')`);
+        newCellB.setAttribute('onclick', `downloadFile('${fileLists.B[i]}')`);
+        newCellC.setAttribute('onclick', `downloadFile('${fileLists.C[i]}')`);
+        newCellD.setAttribute('onclick', `downloadFile('${fileLists.D[i]}')`);
       }
       filesTable.style.display = 'table';
     }
@@ -191,13 +186,14 @@ function listFiles(month) {
   xml.send(); // Envio da requisição HTTP ao servidor
 }
 
-function mkList (stringList) {
+function formatFileLists (rawFileLists) {
 
-  var arrayList = stringList.split("|"); // Divide a string em um vetor de strings separando os elementos pelo caracter "|". Agora cada elemento deste vetor é o nome de um arquivo
-  var dataListA = []; // Vetores que receberão os nomes dos arquivos relativos ao seu gerador
-  var dataListB = [];
-  var dataListC = [];
-  var dataListD = [];
+  var arrayList = rawFileLists.split("|"); // Divide a string em um vetor de strings separando os elementos pelo caracter "|". Agora cada elemento deste vetor é o nome de um arquivo
+  arrayList.sort();
+  var fileListA = []; // Vetores que receberão os nomes dos arquivos relativos ao seu gerador
+  var fileListB = [];
+  var fileListC = [];
+  var fileListD = [];
   var gen; // Variável que recebe o prefíxo do nome do arquivo que possibilita a distinção entre geradores
 
   for (var i in arrayList){
@@ -205,25 +201,25 @@ function mkList (stringList) {
     // Condicional switch para atribuir à última posição de cada vetor o nome de arquivo correspondente ao seu gerador, sem o prefíxo de diretório
     switch (gen) {
       case "A":
-        dataListA.push(arrayList[i]);
+        fileListA.push(arrayList[i]);
       break;
       case "B":
-        dataListB.push(arrayList[i]);
+        fileListB.push(arrayList[i]);
       break;
       case "C":
-        dataListC.push(arrayList[i]);
+        fileListC.push(arrayList[i]);
       break;
       case "D":
-        dataListD.push(arrayList[i]);
+        fileListD.push(arrayList[i]);
       break;
     }
   }
 
   return { // retorna um objeto com as 4 propriedades sendo vetores relativos a lista de arquivos de cada gerador
-    A: dataListA,
-    B: dataListB,
-    C: dataListC,
-    D: dataListD
+    A: fileListA,
+    B: fileListB,
+    C: fileListC,
+    D: fileListD
   }
 }
 
