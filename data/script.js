@@ -26,8 +26,7 @@ function listYears () {
         yearCell.setAttribute('onClick', `listMonths('${yearsArray[year]}')`);
         yearCell.innerHTML = yearsArray[year].substring(1);
         yearRow.appendChild(yearCell);
-
-        document.getElementById('year-table-title').setAttribute('colspan', year + 1)
+        document.getElementById('year-table-title').setAttribute('colspan', `${Number(year) + 1}`);
       }
       document.getElementById('months-table').style.display = 'none';
       document.getElementById('files-table').style.display = 'none';
@@ -43,6 +42,8 @@ function listMonths (year) {
   monthsCells = document.createElement('tbody');
   monthsCells.setAttribute('id', 'months-cells');
   monthsTable.appendChild(monthsCells);
+
+  document.getElementById('files-table').style.display = 'none';
 
   const xml = new XMLHttpRequest();
   xml.open('GET', 'listMonths?year=' + year, true);
@@ -127,10 +128,9 @@ function listMonths (year) {
         }
         monthCell.setAttribute('onClick', `listFiles('${monthsArray[month]}')`);
         monthRow.appendChild(monthCell);
-        document.getElementById('month-table-title').setAttribute('colspan', month + 1)
+        document.getElementById('month-table-title').setAttribute('colspan', `${Number(month) + 1}`);
       }
       monthsTable.style.display = 'table';
-      document.getElementById('files-table').style.display = 'none';
     }
   }
   xml.send();
