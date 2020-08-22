@@ -17,15 +17,17 @@ function listYears () {
       var yearsArray = yearsList.split('|');
       yearsArray.pop();
 
+      const yearRow = document.createElement('tr');
+      yearsCells.appendChild(yearRow);
+
       for(const year in yearsArray) {
-        const yearRow = document.createElement('tr');
-        yearsCells.appendChild(yearRow);
 
         var yearCell = document.createElement('td');
         yearCell.setAttribute('onClick', `listMonths('${yearsArray[year]}')`);
         yearCell.innerHTML = yearsArray[year].substring(1);
-        
         yearRow.appendChild(yearCell);
+
+        document.getElementById('year-table-title').setAttribute('colspan', year + 1)
       }
       document.getElementById('months-table').style.display = 'none';
       document.getElementById('files-table').style.display = 'none';
