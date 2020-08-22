@@ -423,30 +423,60 @@ void setup(){
   server.on("/script.js", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(SPIFFS, "/script.js", "text/javascript");});
   server.on("/logo.png", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(SPIFFS, "/logo.png", "image/png");});
 
-// Descrito no código JavaScript, na página, ao se apertar o botão "Listar arquivos" o cliente envia uma requisição na rota "/listFiles", que executa a função a seguir
-  server.on("/listFiles", HTTP_GET, [](AsyncWebServerRequest *request) {
-    File dir = SD.open("/dados");
-    File file = dir.openNextFile();
-    String list = "";
+  server.on("/listYears", HTTP_GET, [](AsyncWebServerRequest *request) {
+    File root = SD.open("/");
+    File file = root.openNextFile();
+    file = root.openNextFile();
+    String yearsList;
 
     while (file) {
-      list += file.name();
-      list += "|";
-      file = dir.openNextFile();
+      yearsList += file.name();
+      yearsList += "|";
+      file = root.openNextFile();
     }
-
-    Serial.println("Lista enviada");
-    dir.close();
-    file.close();
-    request->send(200, "text/plain", list);
+  
+    root.close();
+    request->send(200, "text/plain", yearsList);
   });
 
-  server.on("/download", HTTP_POST, [](AsyncWebServerRequest *request) {
-    String fname = "/dados/";
-    fname += request->arg("filename"); // No AsyncWebServer é preciso especificar o 'name' do argumento enviado, não o índice
+  server.on("/listMonths", HTTP_GET, [](AsyncWebServerRequest *request) {
+    String year = request->arg("year");
+    File yearDirectory = SD.open(year);
+    File file = yearDirectory.openNextFile();
+    String monthsList = "";
+
+    while (file) {
+      monthsList += file.name();
+      monthsList += "|";
+      file = yearDirectory.openNextFile();
+    }
+    
+    yearDirectory.close();
+    request->send(200, "text/plain", monthsList);
+  });
+
+// Descrito no código JavaScript, na página, ao se apertar o botão "Listar arquivos" o cliente envia uma requisição na rota "/listFiles", que executa a função a seguir
+  server.on("/listFiles", HTTP_GET, [](AsyncWebServerRequest *request) {
+    String month = request->arg("month");
+    File monthDirectory = SD.open(month);
+    File file = monthDirectory.openNextFile();
+    String filesList = "";
+
+    while (file) {
+      filesList += file.name();
+      filesList += "|";
+      file = monthDirectory.openNextFile();
+    }
+
+    monthDirectory.close();
+    request->send(200, "text/plain", filesList);
+  });
+
+  server.on("/downloadFile", HTTP_GET, [](AsyncWebServerRequest *request) {
+    String filePath = request->arg("filePath"); // No AsyncWebServer é preciso especificar o 'name' do argumento enviado, não o índice
     Serial.print("Download requisitado: "); // O nome de um argumento ainda pode ser verificado com a sintaxe request->argName(índice)
-    Serial.println(fname);
-    request->send(SD, fname, "text/csv", true);
+    Serial.println(filePath);
+    request->send(SD, filePath, "text/csv", true);
   });
 
   server.on("/google/auth", HTTP_GET, [](AsyncWebServerRequest *request) {

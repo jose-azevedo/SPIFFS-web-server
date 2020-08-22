@@ -16,14 +16,10 @@
 
 <body>
 
-<section id="section-1">
-
   <header id="header">
     <img src="logo.png" alt="logo GEDAE" id="logo">
-    <h1>Monitoração de Sistemas Fotovoltaicos</h1>
+    <h1 id="title">Monitoração de Sistemas Fotovoltaicos</h1>
   </header>
-
-</section>
 
 <section id="section-2">
 
@@ -32,32 +28,51 @@
 
   <nav id="menu">
     <ul>
-      <li onclick="listar()">Listar arquivos</li>
+      <li onclick="listYears()">Listar arquivos</li>
     </ul>
   </nav>
 
-  <form action="/download" method="POST" target="_self">
-    <input type="text" name="filename" id="filename" value="">
-    <input type="submit" value="Enviar" id="submit">
-  </form>
-  
-  <table id="tabela">
-    <thead>
-      <tr>
-        <th colspan="4">Gerador</th>
-      </tr>
-      <tr>
-        <th>A</th>
-        <th>B</th>
-        <th>C</th>
-        <th>D</th>
-      </tr>
-    </thead>
-    <tbody id="dataCells">
-      <!--Células com arquivos criadas dinamicamente aqui-->
-    </tbody>
-  </table>
+  <div id="tables-container">
 
+    <table class="table" id="years-table">
+      <thead class="table-header">
+        <tr>
+          <th>Ano</th>
+        </tr>
+      </thead>
+      <tbody class="data-cells" id="years-cells">
+        <!--Células com anos de medições criadas dinamicamente aqui-->
+      </tbody>
+    </table>
+
+    <table class="table" id="months-table">
+      <thead class="table-header">
+        <tr>
+          <th id="month-table-title">Mês</th>
+        </tr>
+      </thead>
+      <tbody class="data-cells" id="months-cells">
+        <!--Células com meses de medições criadas dinamicamente aqui-->
+      </tbody>
+    </table>
+    
+    <table class="table" id="files-table">
+      <thead class="table-header">
+        <tr>
+          <th colspan="4">Gerador</th>
+        </tr>
+        <tr>
+          <th>A</th>
+          <th>B</th>
+          <th>C</th>
+          <th>D</th>
+        </tr>
+      </thead>
+      <tbody class="data-cells" id="file-cells">
+        <!--Células com arquivos criadas dinamicamente aqui-->
+      </tbody>
+    </table>
+  </div>
   
 </section>
 
