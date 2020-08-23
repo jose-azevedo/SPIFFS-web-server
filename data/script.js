@@ -9,12 +9,14 @@ function listYears () {
   yearsTable.appendChild(yearsCells);
 
   const xml = new XMLHttpRequest();
-  xml.open('GET', 'listYears', true);
+  xml.open('GET', 'listFilesInDirectory?path=/', true);
   xml.onreadystatechange = function () {
     if ((xml.readyState==4) && (xml.status==200)) {
       yearsList = xml.responseText;
 
       var yearsArray = yearsList.split('|');
+      yearsArray.pop();
+      yearsArray.sort();
       yearsArray.pop();
 
       const yearRow = document.createElement('tr');
@@ -35,7 +37,7 @@ function listYears () {
   xml.send();
 }
 
-function listMonths (year) {
+function listMonths (yearDirectory) {
   const monthsTable = document.getElementById('months-table');
   var monthsCells = document.getElementById('months-cells');
   monthsCells.remove();
@@ -46,7 +48,7 @@ function listMonths (year) {
   document.getElementById('files-table').style.display = 'none';
 
   const xml = new XMLHttpRequest();
-  xml.open('GET', 'listMonths?year=' + year, true);
+  xml.open('GET', 'listFilesInDirectory?path=' + yearDirectory, true);
   xml.onreadystatechange = function () {
     if ((xml.readyState==4) && (xml.status==200)) {
       monthsList = xml.responseText;
@@ -136,7 +138,7 @@ function listMonths (year) {
   xml.send();
 }
 
-function listFiles(month) {
+function listFiles(monthDirectory) {
   const filesTable = document.getElementById('files-table');
   var filesCells = document.getElementById('file-cells');
   filesCells.remove();
@@ -145,7 +147,7 @@ function listFiles(month) {
   filesTable.appendChild(filesCells);
 
   const xml = new XMLHttpRequest();
-  xml.open('GET', 'listFiles?month=' + month, true); // Requisição HTTP do tipo GET na path "/listFiles" do servidor
+  xml.open('GET', 'listFilesInDirectory?path=' + monthDirectory, true); // Requisição HTTP do tipo GET na path "/listFiles" do servidor
   xml.onreadystatechange = function () {
     if ((xml.readyState==4) && (xml.status==200)) { // Quando receber um OK do servidor e a lista bruta, inicia o processamento da lista
       

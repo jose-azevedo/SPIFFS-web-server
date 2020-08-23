@@ -423,52 +423,20 @@ void setup(){
   server.on("/script.js", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(SPIFFS, "/script.js", "text/javascript");});
   server.on("/logo.png", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(SPIFFS, "/logo.png", "image/png");});
 
-  server.on("/listYears", HTTP_GET, [](AsyncWebServerRequest *request) {
-    File root = SD.open("/");
-    File file = root.openNextFile();
-    file = root.openNextFile();
-    String yearsList;
-
-    while (file) {
-      yearsList += file.name();
-      yearsList += "|";
-      file = root.openNextFile();
-    }
-  
-    root.close();
-    request->send(200, "text/plain", yearsList);
-  });
-
-  server.on("/listMonths", HTTP_GET, [](AsyncWebServerRequest *request) {
-    String year = request->arg("year");
-    File yearDirectory = SD.open(year);
-    File file = yearDirectory.openNextFile();
-    String monthsList = "";
-
-    while (file) {
-      monthsList += file.name();
-      monthsList += "|";
-      file = yearDirectory.openNextFile();
-    }
-    
-    yearDirectory.close();
-    request->send(200, "text/plain", monthsList);
-  });
-
 // Descrito no código JavaScript, na página, ao se apertar o botão "Listar arquivos" o cliente envia uma requisição na rota "/listFiles", que executa a função a seguir
-  server.on("/listFiles", HTTP_GET, [](AsyncWebServerRequest *request) {
-    String month = request->arg("month");
-    File monthDirectory = SD.open(month);
-    File file = monthDirectory.openNextFile();
+  server.on("/listFilesInDirectory", HTTP_GET, [](AsyncWebServerRequest *request) {
+    String path = request->arg("path");
+    File dir = SD.open(path);
+    File file = dir.openNextFile();
     String filesList = "";
 
     while (file) {
       filesList += file.name();
       filesList += "|";
-      file = monthDirectory.openNextFile();
+      file = dir.openNextFile();
     }
 
-    monthDirectory.close();
+    dir.close();
     request->send(200, "text/plain", filesList);
   });
 
@@ -478,7 +446,7 @@ void setup(){
     Serial.println(filePath);
     request->send(SD, filePath, "text/csv", true);
   });
-
+  
   server.on("/google/auth", HTTP_GET, [](AsyncWebServerRequest *request) {
     String code = request->arg("code");
     
