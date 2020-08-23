@@ -22,7 +22,7 @@ String apiKey, accessToken;
 
 File config, dayFile;
 
-StaticJsonDocument<636> jsonConfig;
+StaticJsonDocument<650> jsonConfig;
 
 AsyncWebServer server(HTTP_PORT);
 
@@ -50,7 +50,6 @@ String createDirectory(String rawFileName) {
 
 String formatFileName(String rawFileName) {
   String finalName = rawFileName.substring(9, 12) + "-" + rawFileName.substring(12, 14) + "-20" + rawFileName.substring(14, 16);
-  finalName.toUpperCase();
   return finalName;
 }
 
@@ -445,13 +444,6 @@ void setup(){
     Serial.print("Download requisitado: "); // O nome de um argumento ainda pode ser verificado com a sintaxe request->argName(índice)
     Serial.println(filePath);
     request->send(SD, filePath, "text/csv", true);
-  });
-  
-  server.on("/google/auth", HTTP_GET, [](AsyncWebServerRequest *request) {
-    String code = request->arg("code");
-    
-    request->send(200, "text/plain", "Código de autorização: " + code);
-  
   });
   
   const char* apiKeyChar = jsonConfig["api_key"];
