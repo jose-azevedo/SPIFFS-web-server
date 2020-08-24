@@ -264,7 +264,7 @@ void createFileOnGoogleDrive(const String& fileName, const String& dataToSend, H
 
   http.setTimeout(15000);
 
-  String JSONReqBody = "{\"name\": \""+fileName+"\",\"mimeType\": \"application/vnd.google-apps.spreadsheet\"}";
+  String JSONReqBody = "{\"name\": \""+fileName+"\",\"mimeType\": \"application/vnd.google-apps.spreadsheet\", \"parents\":[\"12laC6FeSPaeqy3mrEDzfnW2x3Aq8GqdJ\"]}";
   int httpResponseCode = http.POST(JSONReqBody);
 
   Serial.println("Criação do arquivo " + fileName + " solicitada.\nCódigo de resposta: " + httpResponseCode);
