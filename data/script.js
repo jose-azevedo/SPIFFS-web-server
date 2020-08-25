@@ -141,7 +141,7 @@ function showFiles(fileCellsBody, response) {
   var gen; // Variável que recebe o prefíxo do nome do arquivo que possibilita a distinção entre geradores
 
   for (const i in arrayList){
-    gen = arrayList[i].slice(10, 11) // Variável recebe o prefixo contido nos 8 primeiros caracteres
+    gen = arrayList[i].slice(-5, -4) // Variável recebe o prefixo contido nos 8 primeiros caracteres
     // Condicional switch para atribuir à última posição de cada vetor o nome de arquivo correspondente ao seu gerador, sem o prefíxo de diretório
     switch (gen) {
       case "A":

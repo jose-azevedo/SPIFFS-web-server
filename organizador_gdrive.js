@@ -11,7 +11,7 @@ function organizeFiles() {
 }
 
 function getYearFolder(file){
-  const year = file.getName().substring(7, 11);
+  const year = file.getName().substring(6, 10);
   const yearFolders = DriveApp.getFoldersByName(year);
   
   var foldersCounter = 0;
@@ -57,7 +57,7 @@ function moveFileToCorrespondingFolder(file, monthFolder) {
 }
 
 function getMonthName(fileName) {
-  var monthNumber = Number(fileName.substring(4, 6));
+  var monthNumber = Number(fileName.substring(3, 5));
   switch (monthNumber){
     case 1:
       return "Janeiro";
@@ -99,9 +99,9 @@ function getMonthName(fileName) {
 }
 
 function createTrigger() {
-    ScriptApp.newTrigger('organizeFiles')
-    .timeBased()
-    .everyDays(1)
-    .atHour(1)
-    .create();
-  }
+  ScriptApp.newTrigger('organizeFiles')
+  .timeBased()
+  .everyDays(1)
+  .atHour(1)
+  .create();
+}

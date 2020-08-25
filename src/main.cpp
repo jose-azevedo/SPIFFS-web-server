@@ -49,7 +49,7 @@ String createDirectory(String rawFileName) {
 }
 
 String formatFileName(String rawFileName) {
-  String finalName = rawFileName.substring(9, 12) + "-" + rawFileName.substring(12, 14) + "-20" + rawFileName.substring(14, 16);
+  String finalName = rawFileName.substring(9, 11) + "-" + rawFileName.substring(11, 13) + "-20" + rawFileName.substring(13, 15) + "-M2" + rawFileName.substring(15, 16);
   return finalName;
 }
 

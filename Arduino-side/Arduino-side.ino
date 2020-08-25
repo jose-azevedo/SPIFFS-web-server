@@ -227,51 +227,51 @@ void createFile(){
   switch (tempo.mon) {
     case 1:
     sprintf(directory, "%d/JAN/", tempo.year);
-    sprintf(filePath, "%d/JAN/%c%02d%02d%02d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
+    sprintf(filePath, "%d/JAN/%02d%02d%02d%c.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000, generator);
     break;
     case 2:
     sprintf(directory, "%d/FEV", tempo.year);
-    sprintf(filePath, "%d/FEV/%c%02d%02d%02d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
+    sprintf(filePath, "%d/FEV/%02d%02d%02d%c.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000, generator);
     break;
     case 3:
     sprintf(directory, "%d/MAR", tempo.year);
-    sprintf(filePath, "%d/MAR/%c%02d%02d%02d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
+    sprintf(filePath, "%d/MAR/%02d%02d%02d%c.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000, generator);
     break;
     case 4:
     sprintf(directory, "%d/ABR", tempo.year);
-    sprintf(filePath, "%d/ABR/%c%02d%02d%02d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
+    sprintf(filePath, "%d/ABR/%02d%02d%02d%c.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000, generator);
     break;
     case 5:
     sprintf(directory, "%d/MAI", tempo.year);
-    sprintf(filePath, "%d/MAI/%c%02d%02d%02d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
+    sprintf(filePath, "%d/MAI/%02d%02d%02d%c.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000, generator);
     break;
     case 6:
     sprintf(directory, "%d/JUN", tempo.year);
-    sprintf(filePath, "%d/JUN/%c%02d%02d%02d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
+    sprintf(filePath, "%d/JUN/%02d%02d%02d%c.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000, generator);
     break;
     case 7:
     sprintf(directory, "%d/JUL", tempo.year);
-    sprintf(filePath, "%d/JUL/%c%02d%02d%02d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
+    sprintf(filePath, "%d/JUL/%02d%02d%02d%c.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000, generator);
     break;
     case 8:
     sprintf(directory, "%d/AGO", tempo.year);
-    sprintf(filePath, "%d/AGO/%c%02d%02d%02d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
+    sprintf(filePath, "%d/AGO/%02d%02d%02d%c.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000, generator);
     break;
     case 9:
     sprintf(directory, "%d/SET", tempo.year);
-    sprintf(filePath, "%d/SET/%c%02d%02d%02d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
+    sprintf(filePath, "%d/SET/%02d%02d%02d%c.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000, generator);
     break;
     case 10:
     sprintf(directory, "%d/OUT", tempo.year);
-    sprintf(filePath, "%d/OUT/%c%02d%02d%02d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
+    sprintf(filePath, "%d/OUT/%02d%02d%02d%c.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000, generator);
     break;
     case 11:
     sprintf(directory, "%d/NOV", tempo.year);
-    sprintf(filePath, "%d/NOV/%c%02d%02d%02d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
+    sprintf(filePath, "%d/NOV/%02d%02d%02d%c.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000, generator);
     break;
     case 12:
     sprintf(directory, "%d/DEZ", tempo.year);
-    sprintf(filePath, "%d/DEZ/%c%02d%02d%02d.csv", tempo.year, generator, tempo.date, tempo.mon, tempo.year-2000);
+    sprintf(filePath, "%d/DEZ/%02d%02d%02d%c.csv", tempo.year, tempo.date, tempo.mon, tempo.year-2000, generator);
     break;
   }
 
