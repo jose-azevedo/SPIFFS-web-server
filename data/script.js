@@ -1,12 +1,11 @@
 window.onload = function() {listYears()};
 
 function listYears () {
+  document.getElementById('years-cells').remove();
   const yearsTable = document.getElementById('years-table');
-  var yearsCells = document.getElementById('years-cells');
-  yearsCells.remove();
-  yearsCells = document.createElement('tbody');
-  yearsCells.setAttribute('id', 'years-cells');
-  yearsTable.appendChild(yearsCells);
+  const yearCellsBody = document.createElement('tbody');
+  yearCellsBody.setAttribute('id', 'years-cells');
+  yearsTable.appendChild(yearCellsBody);
 
   const xml = new XMLHttpRequest();
   xml.open('GET', 'listFilesInDirectory?path=/', true);
@@ -16,11 +15,11 @@ function listYears () {
       yearsArray.shift();
 
       const yearRow = document.createElement('tr');
-      yearsCells.appendChild(yearRow);
+      yearCellsBody.appendChild(yearRow);
 
       for(const year in yearsArray) {
 
-        var yearCell = document.createElement('td');
+        const yearCell = document.createElement('td');
         yearCell.setAttribute('onClick', `listMonths('${yearsArray[year]}')`);
         yearCell.innerHTML = yearsArray[year].substring(1);
         yearRow.appendChild(yearCell);
@@ -34,12 +33,11 @@ function listYears () {
 }
 
 function listMonths (yearDirectory) {
+  document.getElementById('months-cells').remove();
   const monthsTable = document.getElementById('months-table');
-  var monthsCells = document.getElementById('months-cells');
-  monthsCells.remove();
-  monthsCells = document.createElement('tbody');
-  monthsCells.setAttribute('id', 'months-cells');
-  monthsTable.appendChild(monthsCells);
+  const monthCellsBody = document.createElement('tbody');
+  monthCellsBody.setAttribute('id', 'months-cells');
+  monthsTable.appendChild(monthCellsBody);
 
   document.getElementById('files-table').style.display = 'none';
 
@@ -79,10 +77,10 @@ function listMonths (yearDirectory) {
       });
       
       const monthRow = document.createElement('tr');
-      monthsCells.appendChild(monthRow);
+      monthCellsBody.appendChild(monthRow);
 
       for(const month in monthsArray) {
-        var monthCell = document.createElement('td');
+        const monthCell = document.createElement('td');
         const monthPrefix = monthsArray[month].substring(6);
         switch (monthPrefix){
           case 'JAN':
@@ -133,12 +131,11 @@ function listMonths (yearDirectory) {
 }
 
 function listFiles(monthDirectory) {
+  document.getElementById('file-cells').remove();
   const filesTable = document.getElementById('files-table');
-  var filesCells = document.getElementById('file-cells');
-  filesCells.remove();
-  filesCells = document.createElement('tbody');
-  filesCells.setAttribute('id', 'file-cells');
-  filesTable.appendChild(filesCells);
+  const fileCellsBody = document.createElement('tbody');
+  fileCellsBody.setAttribute('id', 'file-cells');
+  filesTable.appendChild(fileCellsBody);
 
   const xml = new XMLHttpRequest();
   xml.open('GET', 'listFilesInDirectory?path=' + monthDirectory, true); // Requisição HTTP do tipo GET na path "/listFiles" do servidor
@@ -185,7 +182,7 @@ function listFiles(monthDirectory) {
           if (fileRow == null) {
             fileRow = document.createElement('tr');
             fileRow.setAttribute('id', `file-row-${j}`);
-            filesCells.appendChild(fileRow);
+            fileCellsBody.appendChild(fileRow);
           }
 
           const fileCell = document.createElement('td');
