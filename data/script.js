@@ -12,12 +12,8 @@ function listYears () {
   xml.open('GET', 'listFilesInDirectory?path=/', true);
   xml.onreadystatechange = function () {
     if ((xml.readyState==4) && (xml.status==200)) {
-      yearsList = xml.responseText;
-
-      var yearsArray = yearsList.split('|');
-      yearsArray.pop();
-      yearsArray.sort();
-      yearsArray.pop();
+      const yearsArray = JSON.parse(xml.responseText).files;
+      yearsArray.shift();
 
       const yearRow = document.createElement('tr');
       yearsCells.appendChild(yearRow);
@@ -51,12 +47,7 @@ function listMonths (yearDirectory) {
   xml.open('GET', 'listFilesInDirectory?path=' + yearDirectory, true);
   xml.onreadystatechange = function () {
     if ((xml.readyState==4) && (xml.status==200)) {
-      monthsList = xml.responseText;
-      
-      const monthRow = document.createElement('tr');
-      monthsCells.appendChild(monthRow);
-      var monthsArray = monthsList.split('|');
-      monthsArray.pop();
+      const monthsArray = JSON.parse(xml.responseText).files;
       monthsArray.sort((a, b) => {
         a = a.substring(6);
         b = b.substring(6);
@@ -86,6 +77,9 @@ function listMonths (yearDirectory) {
         if (b == 'DEZ') b = 12;
         return a-b;
       });
+      
+      const monthRow = document.createElement('tr');
+      monthsCells.appendChild(monthRow);
 
       for(const month in monthsArray) {
         var monthCell = document.createElement('td');
@@ -150,11 +144,40 @@ function listFiles(monthDirectory) {
   xml.open('GET', 'listFilesInDirectory?path=' + monthDirectory, true); // Requisição HTTP do tipo GET na path "/listFiles" do servidor
   xml.onreadystatechange = function () {
     if ((xml.readyState==4) && (xml.status==200)) { // Quando receber um OK do servidor e a lista bruta, inicia o processamento da lista
-      
-      const rawFileLists = xml.responseText; // Recebe a lista bruta de todos os arquivos em uma única string separados por um "|"
-      
-      const fileLists = formatFileLists(rawFileLists) // Função recebe a lista bruta e retorna um objeto com as propriedades relativas a lista de cada gerador 
+      const arrayList = JSON.parse(xml.responseText).files.sort(); // Recebe a lista bruta de todos os arquivos em uma única string separados por um "|"
 
+      const fileListA = []; // Vetores que receberão os nomes dos arquivos relativos ao seu gerador
+      const fileListB = [];
+      const fileListC = [];
+      const fileListD = [];
+      var gen; // Variável que recebe o prefíxo do nome do arquivo que possibilita a distinção entre geradores
+
+      for (const i in arrayList){
+        gen = arrayList[i].slice(10, 11) // Variável recebe o prefixo contido nos 8 primeiros caracteres
+        // Condicional switch para atribuir à última posição de cada vetor o nome de arquivo correspondente ao seu gerador, sem o prefíxo de diretório
+        switch (gen) {
+          case "A":
+            fileListA.push(arrayList[i]);
+          break;
+          case "B":
+            fileListB.push(arrayList[i]);
+          break;
+          case "C":
+            fileListC.push(arrayList[i]);
+          break;
+          case "D":
+            fileListD.push(arrayList[i]);
+          break;
+        }
+      }
+
+      const fileLists = [
+        fileListA,
+        fileListB,
+        fileListC,
+        fileListD
+      ]
+      
       for (const i in fileLists) { // Laço se repete enquanto houverem elementos nos vetores
         for (const j in fileLists[i]) {
 
@@ -175,43 +198,6 @@ function listFiles(monthDirectory) {
     }
   }
   xml.send(); // Envio da requisição HTTP ao servidor
-}
-
-function formatFileLists (rawFileLists) {
-
-  const arrayList = rawFileLists.split("|"); // Divide a string em um vetor de strings separando os elementos pelo caracter "|". Agora cada elemento deste vetor é o nome de um arquivo
-  arrayList.sort();
-  var fileListA = []; // Vetores que receberão os nomes dos arquivos relativos ao seu gerador
-  var fileListB = [];
-  var fileListC = [];
-  var fileListD = [];
-  var gen; // Variável que recebe o prefíxo do nome do arquivo que possibilita a distinção entre geradores
-
-  for (const i in arrayList){
-    gen = arrayList[i].slice(10, 11) // Variável recebe o prefixo contido nos 8 primeiros caracteres
-    // Condicional switch para atribuir à última posição de cada vetor o nome de arquivo correspondente ao seu gerador, sem o prefíxo de diretório
-    switch (gen) {
-      case "A":
-        fileListA.push(arrayList[i]);
-      break;
-      case "B":
-        fileListB.push(arrayList[i]);
-      break;
-      case "C":
-        fileListC.push(arrayList[i]);
-      break;
-      case "D":
-        fileListD.push(arrayList[i]);
-      break;
-    }
-  }
-
-  return [ // retorna um objeto com as 4 propriedades sendo vetores relativos a lista de arquivos de cada gerador
-    fileListA,
-    fileListB,
-    fileListC,
-    fileListD
-  ]
 }
 
 function downloadFile (filePath) {

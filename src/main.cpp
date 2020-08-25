@@ -427,16 +427,19 @@ void setup(){
     String path = request->arg("path");
     File dir = SD.open(path);
     File file = dir.openNextFile();
-    String filesList = "";
+    String filesList = "{\"files\":[";
 
     while (file) {
+      filesList += "\"";
       filesList += file.name();
-      filesList += "|";
+      filesList += "\"";
       file = dir.openNextFile();
+      if (file) filesList += ",";
     }
+    filesList += "]}";
 
     dir.close();
-    request->send(200, "text/plain", filesList);
+    request->send(200, "application/json", filesList);
   });
 
   server.on("/downloadFile", HTTP_GET, [](AsyncWebServerRequest *request) {
