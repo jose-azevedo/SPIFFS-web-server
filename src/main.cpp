@@ -29,8 +29,8 @@ AsyncWebServer server(HTTP_PORT);
 IPAddress staticIP(192, 168, 15, 47);
 IPAddress gateway(192, 168, 15, 1);
 IPAddress subnet(255, 255, 255, 0);
-IPAddress dns1(192, 168, 15, 1);
-IPAddress dns2(200, 175, 89, 139);
+IPAddress dns1(8, 8, 8, 8);
+IPAddress dns2(8, 8, 4, 4);
 
 String createDirectory(String rawFileName) {
   String year = rawFileName.substring(0, 4);
