@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <ESPmDNS.h>
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 #include <SD.h>
@@ -7,10 +8,13 @@
 #include "ESPAsyncWebServer.h"
 #include "SPIFFS.h"
 
-#define RXD2 16
-#define TXD2 17
-#define CS_PIN 4
-#define HTTP_PORT 8008
+#define RXD2 26
+#define TXD2 27
+#define CS_PIN 22
+#define MOSI_PIN 21
+#define SCK_PIN 19
+#define MISO_PIN 23
+#define HTTP_PORT 80
 #define MAXIMUM_ATTEMPTS 2
 
 int i = 0, tryAgain = 0;
@@ -373,7 +377,7 @@ void setup(){
   Serial.begin(115200);
   Serial1.begin(9600, SERIAL_8N1, RXD2, TXD2);
   
-  SPI.begin(18, 19, 23);
+  SPI.begin(SCK_PIN, MISO_PIN, MOSI_PIN);
   
   if (SPIFFS.begin()){
     Serial.println("SPIFFS inicializado");
@@ -412,9 +416,16 @@ void setup(){
     delay(500);
   }
 
-// Imprime na tela o IP atribuído dinamicamente
-  Serial.print("\nEndereço de IP: ");
-  Serial.println(WiFi.localIP());
+  if(!MDNS.begin("monitoramento-m2")) {
+    Serial.println("MDNS falhou");
+    return;  
+  } else {
+    Serial.print("\nPágina do servidor disponível em http://monitoramento-m2.local ou http://");
+    Serial.println(WiFi.localIP());
+    Serial.println("\n------------------------------------------------------------------\n");
+  }
+
+  MDNS.addService("http", "tcp", 80);
 
 // "Paths", ou rotas, a que o servidor responde ao receber uma requisição de um cliente. Na raiz "/" o servidor envia a página HTML. Como os arquivos de estilo, código JavaScript e logo estão referenciados na página HTML as requisições pedindo por esses arquivos são enviadas automaticamente e por isso é preciso haver uma resposta para cada uma delas.
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(SPIFFS, "/index.html", "text/html");});

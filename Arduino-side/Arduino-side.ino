@@ -362,6 +362,8 @@ void clearVariables(){
     I_AC[i] = 0;
     V_AC[i] = 0;
     
+    sumI_DC[i] = 0;
+    sumV_DC[i] = 0;
     sumI_AC[i] = 0;
     sumV_AC[i] = 0;
     

@@ -35,6 +35,7 @@ function listFilesInDirectory (path, tableElement) {
 function showYears(yearCellsBody, response) {
   const yearsArray = JSON.parse(response).files;
   yearsArray.shift();
+  yearsArray.sort();
 
   const yearRow = document.createElement('tr');
   yearCellsBody.appendChild(yearRow);
