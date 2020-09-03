@@ -20,18 +20,17 @@ void createFile(void);
 void storeData(void);
 void accumulate(void);
 void clearCumulativeVariables(void);
-void clearVariables(void);
 void clearAverageVariables(void);
 
 int timeToSaveA = 0, timeToSaveB = 0;
-int acc = 0;
 
-char C = 'C';
+char step = 'D';
 int x = 0;
 int bitInput = 0;
 int sample = 0;
-int media = 0;
+int iterations = 0;
 int i = 0;
+int counter = 0;
 
 unsigned int ADCH_16 = 0;
 unsigned int ADCL_16 = 0;
@@ -39,40 +38,26 @@ unsigned int ADCL_16 = 0;
 //Vetores com os valores de três ciclos de corrente e tensão
 int I[N] = {0}, V[N] = {0};
 
-//Soma dos valores do vetor para cálculo da média
-double I_DC[2] = {0}, V_DC[2] = {0}, I_AC[2] = {0}, V_AC[2] = {0};
+struct parameters {
+  double avg = 0;
+  double rms = 0;
+  double avg_rms = 0;
+} I_DC[2], V_DC[2], I_AC[2], V_AC[2];
 
-//Média de dez aquisições de valores médios de corrente e tensão
-double avgI_DC[2] = {0}, avgV_DC[2] = {0};
+struct cumulative_parameters {
+  double I_DCavg = 0;
+  double I_DCrms = 0;
+  double V_DCavg = 0;
+  double V_DCrms = 0;
+  double P_DC = 0;
+  double I_ACrms = 0;
+  double V_ACrms = 0;
+  double P_AC = 0;
+  double S = 0;
+  double FP = 0;
+} acc[2];
 
-//Soma dos quadrados dos valores dos vetores
-double sumI_DC[2] = {0}, sumV_DC[2] = {0}, sumI_AC[2] = {0}, sumV_AC[2] = {0};
-
-//Soma dos produtos de corrente e tensão
-double sumP_AC[2] = {0};
-
-//Valores eficazes de corrente e tensão
-double rmsI_DC[2] = {0}, rmsV_DC[2] = {0}, rmsI_AC[2] = {0}, rmsV_AC[2] = {0};
-
-//Média de dez aquisições dos valores eficazes de corrente e tensão
-double avg_rmsI_AC[2] = {0}, avg_rmsV_AC[2] = {0};
-
-//Potências ativas
-double P_DC[2] = {0}, P_AC[2] = {0};
-
-//Potências aparentes
-double S[2] = {0};
-
-//Soma dos fatores de potência de dez aquisições e média destes
-double FP[2] = {0};
-
-//Variáveis acumuladoras para armazenamento local
-double acc_avgI_DC[2] = {0}, acc_avgV_DC[2] = {0}, acc_rmsI_DC[2] = {0}, acc_rmsV_DC[2] = {0};
-double acc_rmsI_AC[2] = {0}, acc_rmsV_AC[2] = {0};
-double accP_DC[2] = {0}, accP_AC[2] = {0};
-double accS[2] = {0};
-double accFP[2] = {0};
-
+double P_DC[2] = {0}, P_AC[2] = {0}, S[2] = {0}, FP[2] = {0};
 
 void setup() {
   cli(); // Desabilitar interrupções
@@ -138,7 +123,7 @@ ISR(ADC_vect) { // Quando um novo resultado AD estiver pronto
     I[sample] = bitInput;
     ADMUX = 0x63;
     break;
-    case 0x63: // ADC2: Corrente DC 2
+    case 0x63: // ADC2: Tensão DC 2
     V[sample] = bitInput;
     ADMUX = 0x62;
     sample++;
@@ -166,7 +151,7 @@ ISR(ADC_vect) { // Quando um novo resultado AD estiver pronto
     
     default:
     ADMUX = 0x60;
-    C = 'C';
+    step = 'D';
     break;
   }
   TIFR1 |= (0 << OCF1B); // Limpar a flag de interrupção do Timer, habilitando outra borda de subida
@@ -183,30 +168,32 @@ ISR(ADC_vect) { // Quando um novo resultado AD estiver pronto
  Ou seja, a cada vez que o loop principal é executado, são executados somente os cálculos
  de parâmetros ou DC1 ou DC2 ou AC1 ou AC2, nunca mais de um destes e sempre nesta ordem.
 */
-void next(){
-  if (x==0 && C=='C') {
-    x = 1;
-    ADMUX = 0x62;
-  }
-  else {
-    if (x==1 && C=='C') {
-      x = 0;
-      C = 'A';
-      ADMUX = 0x64;
-    }
-    else {
-      if (x==0 && C=='A') {
+
+void nextStep(){
+  switch(step) {
+    case 'D':
+      if(x == 0){
+        x = 1;
+        ADMUX = 0x62;
+      } else {
+        x = 0;
+        ADMUX = 0x64;
+        step='A';
+      }
+    break;
+    case 'A':
+      if(x == 0){
         x = 1;
         ADMUX = 0x66;
+      } else {
+        x = 0;
+        ADMUX = 0x60;
+        step='S';
       }
-      else {
-        if (x==1 && C=='A') {
-          x = 0;
-          C = 'C';
-          ADMUX = 0x60;
-        }
-      }
-    }
+    break;
+    case 'S':
+      step='D';
+    break;
   }
 }
 
@@ -308,7 +295,7 @@ void createFile(){
 */
 void storeData(){
 
-  String fileData = String(rtc.getTimeStr()) + ";" + String(acc_avgI_DC[i]/acc) + ";" + String(acc_rmsI_DC[i]/acc) + ";" + String(acc_avgV_DC[i]/acc) + ";" + String(acc_rmsV_DC[i]/acc) + ";" + String(accP_DC[i]/acc) + ";" + String(acc_rmsI_AC[i]/acc) + ";" + String(acc_rmsV_AC[i]/acc) + ";" + String(accS[i]/acc) + ";" + String(accFP[i]/acc);
+  String fileData = String(rtc.getTimeStr()) + ";" + String(acc[i].I_DCavg/counter) + ";" + String(acc[i].I_DCrms/counter) + ";" + String(acc[i].V_DCavg/counter) + ";" + String(acc[i].V_DCrms/counter) + ";" + String(acc[i].P_DC/counter) + ";" + String(acc[i].I_ACrms/counter) + ";" + String(acc[i].V_ACrms/counter) + ";" + String(acc[i].S/counter) + ";" + String(acc[i].FP/counter);
   fileData.replace(".",",");
   
   data = SD.open(filePath, FILE_WRITE);
@@ -335,40 +322,19 @@ void sendToESP32(){
   e no momento do armazenamento, divididos pelo número de acumulações.
 */
 void accumulate(){
-  for (i=0; i<=1; i++) {  
-    acc_avgI_DC[i] += avgI_DC[i];
-    acc_avgV_DC[i] += avgV_DC[i];
-    acc_rmsI_DC[i] += rmsI_DC[i];
-    acc_rmsV_DC[i] += rmsV_DC[i];
-    acc_rmsI_AC[i] += avg_rmsI_AC[i];
-    acc_rmsV_AC[i] += avg_rmsV_AC[i];
-    accP_DC[i] += P_DC[i];
-    accP_AC[i] += P_AC[i]; 
-    accS[i] += S[i];
-    accFP[i] += FP[i];
+  for (int i=0; i<=1; i++) {  
+    acc[i].I_DCavg += I_DC[i].avg;
+    acc[i].I_DCrms += I_DC[i].rms;
+    acc[i].V_DCavg += V_DC[i].avg;
+    acc[i].V_DCrms += V_DC[i].rms;
+    acc[i].P_DC += P_DC[i];
+    acc[i].I_ACrms += I_AC[i].rms;
+    acc[i].V_ACrms += V_AC[i].rms;
+    acc[i].P_AC += P_AC[i]; 
+    acc[i].S += S[i];
+    acc[i].FP += FP[i];
   }
-  acc++;
-}
-
-/*
-  Função limpadora de variáveis instantâneas
-  Para receber novos dados do conversor AD, as seguintes variáveis são zeradas.
-*/
-void clearVariables(){
-  sample = 0;
-  for (i=0; i<=1; i++) {
-    I_DC[i] = 0;
-    V_DC[i] = 0;
-    I_AC[i] = 0;
-    V_AC[i] = 0;
-    
-    sumI_DC[i] = 0;
-    sumV_DC[i] = 0;
-    sumI_AC[i] = 0;
-    sumV_AC[i] = 0;
-    
-    sumP_AC[i] = 0;
-  }
+  counter++;
 }
 
 /*
@@ -376,14 +342,14 @@ void clearVariables(){
   Para se calcular novos valores de médias, as seguintes variáveis são zeradas.
 */
 void clearAverageVariables(){
-  for (i=0; i<=1; i++) {
-    avgI_DC[i] = 0;
-    avgV_DC[i] = 0;
-    rmsI_DC[i] = 0;
-    rmsV_DC[i] = 0;
+  for (int i=0; i<=1; i++) {
+    I_DC[i].avg = 0;
+    I_DC[i].rms = 0;
+    V_DC[i].avg = 0;
+    V_DC[i].rms = 0;
     
-    avg_rmsI_AC[i] = 0;
-    avg_rmsV_AC[i] = 0;
+    I_AC[i].avg_rms = 0;
+    V_AC[i].avg_rms = 0;
     
     FP[i] = 0;
   }
@@ -394,19 +360,53 @@ void clearAverageVariables(){
   A fim de se iniciar outra coleta de dados para outra integralização, as seguintes variáveis são zeradas.
 */
 void clearCumulativeVariables(){
-  for (i=0; i<=1; i++) {  
-    acc_avgI_DC[i] = 0;
-    acc_avgV_DC[i] = 0;
-    acc_rmsI_DC[i] = 0;
-    acc_rmsV_DC[i] = 0;
-    acc_rmsI_AC[i] = 0;
-    acc_rmsV_AC[i] = 0;
-    accP_DC[i] = 0;
-    accP_AC[i] = 0; 
-    accS[i] = 0;
-    accFP[i] = 0; 
+  for (int i=0; i<=1; i++) {  
+    acc[i].I_DCavg = 0;
+    acc[i].I_DCrms = 0;
+    acc[i].V_DCavg = 0;
+    acc[i].V_DCrms = 0;
+    acc[i].P_DC = 0;
+    acc[i].I_ACrms = 0;
+    acc[i].V_ACrms = 0;
+    acc[i].P_AC = 0; 
+    acc[i].S = 0;
+    acc[i].FP = 0;
   }
-  acc = 0;
+  counter = 0;
+}
+
+double getAverageValue(int param[]) {
+  double sum = 0;
+  for(i=0; i < N; i++){
+    sum += param[i]*stepADC;
+  }
+  
+  double avg = sum/N;
+  return avg;
+}
+
+double getRMSValueDC(int param[]) {
+  double sum = 0;
+  for(i=0; i < N; i++){
+    sum += pow(param[i]*stepADC, 2);
+  }
+  
+  double rms = sqrt(sum/N);
+  return rms;
+}
+
+double getRMSValueAC(int param[], double avg) {
+  double sum = 0;
+  for(i=0; i < N; i++){
+    sum += pow(param[i]*stepADC - avg, 2);
+  }
+  
+  double rms = sqrt(sum/N);
+  return rms;
+}
+
+void calibrate(double* param, double a, double b) {
+  *param = *param*a + b;
 }
 
 void loop() {
@@ -415,84 +415,81 @@ void loop() {
   Loop principal de cálculos de parâmetros DC
   Após a coleta de 384 amostras para os vetores I[N] e V[N] e C = 'C', este laço é iniciado.
   Ele é executado duas vezes seguidas, uma para dados de cada sistema, estes que são selecionados
-  a partir da variável x, alterada pela função next() ao fim do laço.
+  a partir da variável x, alterada pela função nextStep() ao fim do laço.
 */
-  if (sample>=N && C=='C') {
+  if (sample>=N && step=='D') {
     cli();
     
-    for(i=0; i<N ;i++){
-      // Soma para média
-      I_DC[x] += I[i]*stepADC;
-      V_DC[x] += V[i]*stepADC;
-    }
-    
-    I_DC[x] = I_DC[x]/N;
-    V_DC[x] = V_DC[x]/N;
-    
     // Soma das médias para cálculo da média
-    avgI_DC[x] += I_DC[x];
-    avgV_DC[x] += V_DC[x];
+    I_DC[x].avg += getAverageValue(I);
+    V_DC[x].avg += getAverageValue(V);
     
-    for(i=0; i<N ;i++){
-      // Soma dos quadrados
-      sumI_DC[x] += pow(I[i]*stepADC, 2);
-      sumV_DC[x] += pow(V[i]*stepADC, 2);
-    }
+    I_DC[x].rms += getRMSValueDC(I);
+    V_DC[x].rms += getRMSValueDC(V);
+
+    iterations++;
+    if (iterations >= M){
     
-    rmsI_DC[x] += sqrt(sumI_DC[x]/N);
-    rmsV_DC[x] += sqrt(sumV_DC[x]/N);
-    
-    media++;
-    
-    if (media >= M){
-    
-      avgI_DC[x] = avgI_DC[x]/M;
-      avgV_DC[x] = avgV_DC[x]/M;
-      rmsI_DC[x] = rmsI_DC[x]/M;
-      rmsV_DC[x] = rmsV_DC[x]/M;
+      I_DC[x].avg /= M;
+      V_DC[x].avg /= M;
+
+      I_DC[x].rms /= M;
+      V_DC[x].rms /= M;
       
       // Curvas de calibração
     
       if (x == 0){
         // Corrente DC 1
-        if (avgI_DC[x] <= 3.574){
-          avgI_DC[x] = avgI_DC[x]*8.3227 - 28.349;   //Curva para correntes abaixo de 1A
-          rmsI_DC[x] = rmsI_DC[x]*8.3227 - 28.349;  
+        if (I_DC[x].avg <= 3.574){
+          calibrate(&I_DC[x].avg, 8.3227, -28.349);   //Curva para correntes abaixo de 1A
+          calibrate(&I_DC[x].rms, 8.3227, -28.349);   
         }
         else{
-          avgI_DC[x] = avgI_DC[x]*9.5957 - 32.781;   //Curva para correntes acima de 1A
-          rmsI_DC[x] = rmsI_DC[x]*9.5957 - 32.781;  
+          
+          calibrate(&I_DC[x].avg, 9.5957, -32.781);   //Curva para correntes acima de 1A
+          calibrate(&I_DC[x].rms, 9.5957, -32.781);  
         }
       
         // Tensão DC 1
-        avgV_DC[x] = avgV_DC[x]*8.226 + 0.3816;
-        rmsV_DC[x] = rmsV_DC[x]*8.226 + 0.3816;
+        calibrate(&V_DC[x].avg, 8.226, 0.3816);
+        calibrate(&V_DC[x].rms, 8.226, 0.3816);
       }
     
       if (x == 1){
         // Corrente DC 2
-        if (avgI_DC[x] <= 3.574){
-          avgI_DC[x] = avgI_DC[x]*9.7144 - 33.469;   //Curva para correntes abaixo de 1A
-          rmsI_DC[x] = rmsI_DC[x]*9.7144 - 33.469;
+        if (I_DC[x].avg <= 3.574){
+          calibrate(&I_DC[x].avg, 9.7144, -33.469);    //Curva para correntes abaixo de 1A
+          calibrate(&I_DC[x].rms, 9.7144, -33.469);
         }
         else{
-          avgI_DC[x] = avgI_DC[x]*9.5777 - 33.01;    //Curva para correntes acima de 1A
-          rmsI_DC[x] = rmsI_DC[x]*9.5777 - 33.01;   
+          calibrate(&I_DC[x].avg, 9.5777, -33.01);    //Curva para correntes acima de 1A
+          calibrate(&I_DC[x].rms, 9.5777, -33.01);
         }
       
         // Tensão DC 2
-        avgV_DC[x] = avgV_DC[x]*8.3735 + 0.4027;
-        rmsV_DC[x] = rmsV_DC[x]*8.3735 + 0.4027;    
+        calibrate(&V_DC[x].avg, 8.3735, 0.4027);
+        calibrate(&V_DC[x].rms, 8.3735, 0.4027);
       }
     
       
-      P_DC[x] = rmsI_DC[x]*rmsV_DC[x];
+      P_DC[x] = I_DC[x].rms*V_DC[x].rms;
     
       digitalWrite(LED_BUILTIN, LOW); // Acionamento do LED embutido para aferir o bom funcionamento do programa
-      next();
-      media = 0;
+      Serial.println("I DC ; I DC rms ; V DC ; V DC rms ; P DC");
+      Serial.print(I_DC[x].avg);
+      Serial.print(" ; ");
+      Serial.print(I_DC[x].rms);
+      Serial.print(" ; ");
+      Serial.print(V_DC[x].avg);
+      Serial.print(" ; ");
+      Serial.print(V_DC[x].rms);
+      Serial.print(" ; ");
+      Serial.print(P_DC[x]);
+      Serial.println("\n----------------------------------------------------------------\n");
+      nextStep();
+      iterations = 0;
     }
-    clearVariables();
+    sample = 0;
     sei();
   }
   
@@ -500,113 +497,142 @@ void loop() {
     Loop principal de cálculos de parâmetros AC
     Após a coleta de 384 amostras para os vetores I[N] e V[N] e C = 'A', este laço é iniciado.
     Ele é executado duas vezes seguidas, uma para dados de cada sistema, estes que são selecionados
-    a partir da variável x, alterada pela função next() ao fim do laço. Ao fim, também são operadas
+    a partir da variável x, alterada pela função nextStep() ao fim do laço. Ao fim, também são operadas
     as variáveis de temporização de armazenamento e são chamadas as funções que salvam os dados no cartão SD.
   */
-  if (sample>=N && C=='A') {
+  if (sample>=N && step=='A') {
     cli();
     
-    for(i=0; i<N ;i++){
-      // Soma para média
-      I_AC[x] += I[i]*stepADC;
-      V_AC[x] += V[i]*stepADC;
-    }
-    
-    I_AC[x] = I_AC[x]/N;
-    V_AC[x] = V_AC[x]/N;
-    
-    for(i=0; i<N ;i++){
-      // Soma dos quadrados
-      sumI_AC[x] += pow(I[i]*stepADC - I_AC[x], 2);
-      sumV_AC[x] += pow(V[i]*stepADC - V_AC[x], 2);
-      
-      // Soma dos produtos de corrente e tensão
-      sumP_AC[x] += (I[i]*stepADC - I_AC[x])*(V[i]*stepADC - V_AC[x]);
-    }
-    
+    I_AC[x].avg = getAverageValue(I);
+    V_AC[x].avg = getAverageValue(V);
+
     // Valores eficazes
-    rmsI_AC[x] = sqrt(sumI_AC[x]/N);
-    rmsV_AC[x] = sqrt(sumV_AC[x]/N);
+    I_AC[x].rms = getRMSValueAC(I, I_AC[x].avg);
+    V_AC[x].rms = getRMSValueAC(V, V_AC[x].avg);
+
+    I_AC[x].avg_rms += I_AC[x].rms;
+    V_AC[x].avg_rms += V_AC[x].rms;
     
-    // Soma dos valores eficazes para cálculo da média
-    avg_rmsI_AC[x] += rmsI_AC[x];
-    avg_rmsV_AC[x] += rmsV_AC[x];
+    for(i=0; i < N ;i++){
+      // Soma dos produtos de corrente e tensão
+      P_AC[x] += (I[i]*stepADC - I_AC[x].avg)*(V[i]*stepADC - V_AC[x].avg);
+    }
     
     // Potência ativa
-    P_AC[x] = sumP_AC[x]/N;
+    P_AC[x] /= N;
     
     // Soma dos valores de fator de potência para cálculo da média
-    FP[x] += P_AC[x]/(rmsI_AC[x]*rmsV_AC[x]); 
+    FP[x] += P_AC[x] / (I_AC[x].rms*V_AC[x].rms); 
     
-    media++;
+    iterations++;
+    if (iterations >= M) {
     
-    if (media >= M){
+      I_AC[x].rms = I_AC[x].avg_rms/M;
+      V_AC[x].rms = V_AC[x].avg_rms/M;
     
-      avg_rmsI_AC[x] = avg_rmsI_AC[x]/M;
-      avg_rmsV_AC[x] = avg_rmsV_AC[x]/M;
-    
-          // Curvas de calibração
+      // Curvas de calibração
       if (x == 0){
         // Corrente AC 1
-        if (avg_rmsI_AC[x] <= 0.076)  avg_rmsI_AC[x] = avg_rmsI_AC[x]*13.116 - 0.0161;   //Curva para correntes abaixo de 1A
-        else  avg_rmsI_AC[x] = avg_rmsI_AC[x]*13.556 - 0.0279;                           //Curva para correntes acima de 1A
+        if (I_AC[x].rms <= 0.076) {
+          calibrate(&I_AC[x].rms, 13.116, -0.0161);              //Curva para correntes abaixo de 1A
+        }
+        else {
+          calibrate(&I_AC[x].rms, 13.556, -0.0279);              //Curva para correntes acima de 1A
+        }
         
         // Tensão AC 1
-        avg_rmsV_AC[x] = avg_rmsV_AC[x]*154.74 - 24.544;
+        calibrate(&V_AC[x].rms, 154.74, -24.544);
       }
     
       if (x == 1){
         // Corrente AC 2
-        if (avg_rmsI_AC[x] <= 0.079)  avg_rmsI_AC[x] = avg_rmsI_AC[x]*13.189 - 0.0182;   //Curva para correntes abaixo de 1A
-        else  avg_rmsI_AC[x] = avg_rmsI_AC[x]*13.621301 - 0.032166;                      //Curva para correntes acima de 1A
+        if (I_AC[x].rms <= 0.079) { 
+          calibrate(&I_AC[x].rms, 13.189, -0.0182);         //Curva para correntes abaixo de 1A    
+        }
+        else {
+          calibrate(&I_AC[x].rms, 13.621301, -0.032166);    //Curva para correntes acima de 1A
+        }
       
         // Tensão AC 2
-        avg_rmsV_AC[x] = avg_rmsV_AC[x]*154.080718 - 29.486292;
+        calibrate(&V_AC[x].rms, 154.080718, -29.486292);
       }
       
       // Condição para não se ter valores irreais quando não houver tensão
-      if (avg_rmsV_AC[x] < 180) avg_rmsV_AC[x] = 0; 
+      if (V_AC[x].rms < 180) V_AC[x].rms = 0; 
     
       // Potência
       FP[x] = FP[x]/M;
-      S[x] = avg_rmsI_AC[x]*avg_rmsV_AC[x];
+      S[x] = I_AC[x].rms*V_AC[x].rms;
       P_AC[x] = S[x]*FP[x];
-      
-      if (x == 1){
-        accumulate();
-        clearAverageVariables();
-      }
-      
-      tempo = rtc.getTime(); // Variável recebedora da informação de tempo
-      if (tempo.min > timeToSaveA) timeToSaveA = (tempo.min/interval + 1)*interval; // Os dados só são salvos em minutos múltiplos de 5
-      if (timeToSaveA > tempo.min + interval) timeToSaveA = 0; // Condição para reiniciar o ciclo quando tempo.min superar 55
-      if (tempo.min == timeToSaveA && x == 1){ // Salvar os dados após o tempo de espera e somente quando após os cálculos de AC2
-        Serial.println("Salvando dados...");
-        i = 0;
-        createFile();  
-        storeData();
-        sendToESP32();
-        Serial.println("\n----------------------------------------------------------------\n");
-        
-        i = 1;
-        createFile();  
-        storeData();
-        
-        clearCumulativeVariables();
-        timeToSaveB = timeToSaveA + 1;
-        timeToSaveA = timeToSaveA + interval;
-      }
-      if (tempo.min == timeToSaveB && x == 1){
-        sendToESP32();
-        Serial.println("\n----------------------------------------------------------------\n");
-        timeToSaveB = timeToSaveB + interval;
-      }
-           
-      digitalWrite(LED_BUILTIN, HIGH); // Acionamento do LED embutido para aferir o bom funcionamento do programa
-      next();
-      media = 0;
+
+      Serial.println("I AC rms ; V AC rms ; S ; FP");
+      Serial.print(I_AC[x].rms);
+      Serial.print(" ; ");
+      Serial.print(V_AC[x].rms);
+      Serial.print(" ; ");
+      Serial.print(S[x]);
+      Serial.print(" ; ");
+      Serial.print(FP[x]);
+      Serial.println("\n----------------------------------------------------------------\n");
+      nextStep();
+      iterations = 0;
     }
-    clearVariables();
+    sample = 0;
+    sei();
+  }
+
+  if (step=='S') {
+    cli();
+    accumulate();
+    clearAverageVariables();
+    Serial.println("I DC ; I DC rms ; V DC ; V DC rms ; P DC ; I AC rms ; V AC rms ; S ; FP");
+    Serial.print(acc[x].I_DCavg);
+    Serial.print(" ; ");
+    Serial.print(acc[x].I_DCrms);
+    Serial.print(" ; ");
+    Serial.print(acc[x].V_DCavg);
+    Serial.print(" ; ");
+    Serial.print(acc[x].V_DCrms);
+    Serial.print(" ; ");
+    Serial.print(acc[x].P_DC);
+    Serial.print(" ; ");
+    Serial.print(acc[x].I_ACrms);
+    Serial.print(" ; ");
+    Serial.print(acc[x].V_ACrms);
+    Serial.print(" ; ");
+    Serial.print(acc[x].S
+    Serial.print(" ; ");
+    Serial.print(acc[x].FP);
+    Serial.println("\n----------------------------------------------------------------\n");
+    
+    
+    tempo = rtc.getTime();                                                        // Variável recebedora da informação de tempo
+    if (tempo.min > timeToSaveA) timeToSaveA = (tempo.min/interval + 1)*interval; // Os dados só são salvos em minutos múltiplos de 5
+    if (timeToSaveA > tempo.min + interval) timeToSaveA = 0;                      // Condição para reiniciar o ciclo quando tempo.min superar 55
+    if (tempo.min == timeToSaveA){  // Salvar os dados após o tempo de espera e somente quando após os cálculos de AC2
+      Serial.println("Salvando dados...");
+      i = 0;
+      createFile();  
+      storeData();
+      sendToESP32();
+      Serial.println("\n----------------------------------------------------------------\n");
+      
+      i = 1;
+      createFile();  
+      storeData();
+      
+      clearCumulativeVariables();
+      timeToSaveB = timeToSaveA + 1;
+      timeToSaveA = timeToSaveA + interval;
+    }
+    if (tempo.min == timeToSaveB){
+      sendToESP32();
+      Serial.println("\n----------------------------------------------------------------\n");
+      timeToSaveB = timeToSaveB + interval;
+    }
+          
+    digitalWrite(LED_BUILTIN, HIGH); // Acionamento do LED embutido para aferir o bom funcionamento do programa
+    nextStep();
     sei();
   }
 }
