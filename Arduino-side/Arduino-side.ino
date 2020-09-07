@@ -350,6 +350,7 @@ void clearAverageVariables(){
     
     I_AC[i].avg_rms = 0;
     V_AC[i].avg_rms = 0;
+    P_AC[i] = 0;
     
     FP[i] = 0;
   }
@@ -561,7 +562,7 @@ void loop() {
       if (V_AC[x].rms < 180) V_AC[x].rms = 0; 
     
       // Potência
-      FP[x] = FP[x]/M;
+      FP[x] /= M;
       S[x] = I_AC[x].rms*V_AC[x].rms;
       P_AC[x] = S[x]*FP[x];
 
