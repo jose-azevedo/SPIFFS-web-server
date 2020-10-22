@@ -442,36 +442,40 @@ void loop() {
       if (x == 0){
         // Corrente DC 1
         if (I_DC[x].avg <= 3.574){
-          calibrate(&I_DC[x].avg, 8.3227, -28.349);   //Curva para correntes abaixo de 1A
-          calibrate(&I_DC[x].rms, 8.3227, -28.349);   
+          calibrate(&I_DC[x].avg, 8.3227, -27.149);   //Curva para correntes abaixo de 1A
+          calibrate(&I_DC[x].rms, 8.3227, -27.149);   
         }
         else{
           
-          calibrate(&I_DC[x].avg, 9.5957, -32.781);   //Curva para correntes acima de 1A
-          calibrate(&I_DC[x].rms, 9.5957, -32.781);  
+          calibrate(&I_DC[x].avg, 9.5957, -31.581);   //Curva para correntes acima de 1A
+          calibrate(&I_DC[x].rms, 9.5957, -31.581);  
         }
       
         // Tensão DC 1
-        calibrate(&V_DC[x].avg, 8.226, 0.3816);
-        calibrate(&V_DC[x].rms, 8.226, 0.3816);
+        calibrate(&V_DC[x].avg, 8.226, 1.0816);
+        calibrate(&V_DC[x].rms, 8.226, 1.0816);
       }
     
       if (x == 1){
         // Corrente DC 2
         if (I_DC[x].avg <= 3.574){
-          calibrate(&I_DC[x].avg, 9.7144, -33.469);    //Curva para correntes abaixo de 1A
-          calibrate(&I_DC[x].rms, 9.7144, -33.469);
+          calibrate(&I_DC[x].avg, 9.7144, -31.769);    //Curva para correntes abaixo de 1A
+          calibrate(&I_DC[x].rms, 9.7144, -31.769);
         }
         else{
-          calibrate(&I_DC[x].avg, 9.5777, -33.01);    //Curva para correntes acima de 1A
-          calibrate(&I_DC[x].rms, 9.5777, -33.01);
+          calibrate(&I_DC[x].avg, 9.5777, -31.31);    //Curva para correntes acima de 1A
+          calibrate(&I_DC[x].rms, 9.5777, -31.31);
         }
       
         // Tensão DC 2
-        calibrate(&V_DC[x].avg, 8.3735, 0.4027);
-        calibrate(&V_DC[x].rms, 8.3735, 0.4027);
+        calibrate(&V_DC[x].avg, 8.3735, 1.1027);
+        calibrate(&V_DC[x].rms, 8.3735, 1.1027);
       }
-    
+
+      if (I_DC[x].avg < 0 || I_DC[x].avg < 0) {
+          I_DC[x].avg = 0;
+          I_DC[x].rms = 0;
+      }
       
       P_DC[x] = I_DC[x].rms*V_DC[x].rms;
     
@@ -586,25 +590,25 @@ void loop() {
     cli();
     accumulate();
     clearAverageVariables();
-    Serial.println("I DC ; I DC rms ; V DC ; V DC rms ; P DC ; I AC rms ; V AC rms ; S ; FP");
-    Serial.print(acc[x].I_DCavg);
-    Serial.print(" ; ");
-    Serial.print(acc[x].I_DCrms);
-    Serial.print(" ; ");
-    Serial.print(acc[x].V_DCavg);
-    Serial.print(" ; ");
-    Serial.print(acc[x].V_DCrms);
-    Serial.print(" ; ");
-    Serial.print(acc[x].P_DC);
-    Serial.print(" ; ");
-    Serial.print(acc[x].I_ACrms);
-    Serial.print(" ; ");
-    Serial.print(acc[x].V_ACrms);
-    Serial.print(" ; ");
-    Serial.print(acc[x].S
-    Serial.print(" ; ");
-    Serial.print(acc[x].FP);
-    Serial.println("\n----------------------------------------------------------------\n");
+//    Serial.println("I DC ; I DC rms ; V DC ; V DC rms ; P DC ; I AC rms ; V AC rms ; S ; FP");
+//    Serial.print(acc[x].I_DCavg);
+//    Serial.print(" ; ");
+//    Serial.print(acc[x].I_DCrms);
+//    Serial.print(" ; ");
+//    Serial.print(acc[x].V_DCavg);
+//    Serial.print(" ; ");
+//    Serial.print(acc[x].V_DCrms);
+//    Serial.print(" ; ");
+//    Serial.print(acc[x].P_DC);
+//    Serial.print(" ; ");
+//    Serial.print(acc[x].I_ACrms);
+//    Serial.print(" ; ");
+//    Serial.print(acc[x].V_ACrms);
+//    Serial.print(" ; ");
+//    Serial.print(acc[x].S
+//    Serial.print(" ; ");
+//    Serial.print(acc[x].FP);
+//    Serial.println("\n----------------------------------------------------------------\n");
     
     
     tempo = rtc.getTime();                                                        // Variável recebedora da informação de tempo
