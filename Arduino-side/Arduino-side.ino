@@ -42,7 +42,13 @@ struct parameters {
   double avg = 0;
   double rms = 0;
   double avg_rms = 0;
-} I_DC[2], V_DC[2], I_AC[2], V_AC[2];
+
+  void clearValues() {
+    avg = 0;
+    rms = 0;
+    avg_rms = 0;
+  }
+} IrawDC[2], VrawDC[2], IrawAC[2], VrawAC[2],  I_DC[2], V_DC[2], I_AC[2], V_AC[2];
 
 struct cumulative_parameters {
   double I_DCavg = 0;
@@ -55,7 +61,20 @@ struct cumulative_parameters {
   double P_AC = 0;
   double S = 0;
   double FP = 0;
-} acc[2];
+
+  void clearValues() {
+    I_DCavg = 0;
+    I_DCrms = 0;
+    V_DCavg = 0;
+    V_DCrms = 0;
+    P_DC = 0;
+    I_ACrms = 0;
+    V_ACrms = 0;
+    P_AC = 0;
+    S = 0;
+    FP = 0;
+  }
+} acc[2], acc_raw[2];
 
 double P_DC[2] = {0}, P_AC[2] = {0}, S[2] = {0}, FP[2] = {0};
 
@@ -262,7 +281,7 @@ void createFile(){
     break;
   }
 
-  const String header = "Hora;I DC;I DC rms;V DC;V DC rms;P DC;I AC rms;V AC rms;S;FP";
+  const String header = "Hora;Transdutor I DC;Transdutor V DC;Transdutor I AC;Transdutor V AC rms;I DC;I DC rms;V DC;V DC rms;P DC;I AC rms;V AC rms;S;FP";
   
   // Cabeçalho do arquivo
   if(SD.mkdir(directory)){
@@ -295,7 +314,10 @@ void createFile(){
 */
 void storeData(){
 
-  String fileData = String(rtc.getTimeStr()) + ";" + String(acc[i].I_DCavg/counter) + ";" + String(acc[i].I_DCrms/counter) + ";" + String(acc[i].V_DCavg/counter) + ";" + String(acc[i].V_DCrms/counter) + ";" + String(acc[i].P_DC/counter) + ";" + String(acc[i].I_ACrms/counter) + ";" + String(acc[i].V_ACrms/counter) + ";" + String(acc[i].S/counter) + ";" + String(acc[i].FP/counter);
+  String fileData = String(rtc.getTimeStr()) + ";" + String(acc_raw[i].I_DCavg/counter) + ";" + String(acc_raw[i].V_DCavg/counter) + ";" + String(acc_raw[i].I_ACrms/counter) + ";" + String(acc_raw[i].V_ACrms/counter);
+  
+  fileData = fileData + ";" + String(acc[i].I_DCavg/counter) + ";" + String(acc[i].I_DCrms/counter) + ";" + String(acc[i].V_DCavg/counter) + ";" + String(acc[i].V_DCrms/counter) + ";" + String(acc[i].P_DC/counter) + ";" + String(acc[i].I_ACrms/counter) + ";" + String(acc[i].V_ACrms/counter) + ";" + String(acc[i].S/counter) + ";" + String(acc[i].FP/counter);
+  
   fileData.replace(".",",");
   
   data = SD.open(filePath, FILE_WRITE);
@@ -333,6 +355,13 @@ void accumulate(){
     acc[i].P_AC += P_AC[i]; 
     acc[i].S += S[i];
     acc[i].FP += FP[i];
+
+
+    acc_raw[i].I_DCavg += IrawDC[i].avg;
+    acc_raw[i].V_DCavg += VrawDC[i].avg;
+    acc_raw[i].I_ACrms += IrawAC[i].avg_rms;
+    acc_raw[i].V_ACrms += VrawAC[i].avg_rms;  
+
   }
   counter++;
 }
@@ -353,6 +382,12 @@ void clearAverageVariables(){
     P_AC[i] = 0;
     
     FP[i] = 0;
+
+    IrawDC[x].clearValues();
+    VrawDC[x].clearValues();
+    IrawAC[x].clearValues();
+    VrawAC[x].clearValues();
+
   }
 }
 
@@ -372,6 +407,8 @@ void clearCumulativeVariables(){
     acc[i].P_AC = 0; 
     acc[i].S = 0;
     acc[i].FP = 0;
+
+    acc_raw[x].clearValues();
   }
   counter = 0;
 }
@@ -422,21 +459,24 @@ void loop() {
     cli();
     
     // Soma das médias para cálculo da média
-    I_DC[x].avg += getAverageValue(I);
-    V_DC[x].avg += getAverageValue(V);
+    IrawDC[x].avg += getAverageValue(I);
+    VrawDC[x].avg += getAverageValue(V);
     
-    I_DC[x].rms += getRMSValueDC(I);
-    V_DC[x].rms += getRMSValueDC(V);
+    IrawDC[x].rms += getRMSValueDC(I);
+    VrawDC[x].rms += getRMSValueDC(V);
 
     iterations++;
     if (iterations >= M){
     
-      I_DC[x].avg /= M;
-      V_DC[x].avg /= M;
+      IrawDC[x].avg /= M;
+      VrawDC[x].avg /= M;
 
-      I_DC[x].rms /= M;
-      V_DC[x].rms /= M;
-      
+      IrawDC[x].rms /= M;
+      VrawDC[x].rms /= M;
+
+      I_DC[x] = IrawDC[x];
+      V_DC[x] = VrawDC[x];
+
       // Curvas de calibração
     
       if (x == 0){
@@ -508,32 +548,35 @@ void loop() {
   if (sample>=N && step=='A') {
     cli();
     
-    I_AC[x].avg = getAverageValue(I);
-    V_AC[x].avg = getAverageValue(V);
+    IrawAC[x].avg = getAverageValue(I);
+    VrawAC[x].avg = getAverageValue(V);
 
     // Valores eficazes
-    I_AC[x].rms = getRMSValueAC(I, I_AC[x].avg);
-    V_AC[x].rms = getRMSValueAC(V, V_AC[x].avg);
+    IrawAC[x].rms = getRMSValueAC(I, IrawAC[x].avg);
+    VrawAC[x].rms = getRMSValueAC(V, VrawAC[x].avg);
 
-    I_AC[x].avg_rms += I_AC[x].rms;
-    V_AC[x].avg_rms += V_AC[x].rms;
+    IrawAC[x].avg_rms += I_AC[x].rms;
+    VrawAC[x].avg_rms += V_AC[x].rms;
     
     for(i=0; i < N ;i++){
       // Soma dos produtos de corrente e tensão
-      P_AC[x] += (I[i]*stepADC - I_AC[x].avg)*(V[i]*stepADC - V_AC[x].avg);
+      P_AC[x] += (I[i]*stepADC - IrawAC[x].avg)*(V[i]*stepADC - VrawAC[x].avg);
     }
     
     // Potência ativa
     P_AC[x] /= N;
     
     // Soma dos valores de fator de potência para cálculo da média
-    FP[x] += P_AC[x] / (I_AC[x].rms*V_AC[x].rms); 
+    FP[x] += P_AC[x] / (IrawAC[x].rms*VrawAC[x].rms); 
     
     iterations++;
     if (iterations >= M) {
     
-      I_AC[x].rms = I_AC[x].avg_rms/M;
-      V_AC[x].rms = V_AC[x].avg_rms/M;
+      IrawAC[x].rms = IrawAC[x].avg_rms/M;
+      VrawAC[x].rms = VrawAC[x].avg_rms/M;
+
+      I_AC[x] = IrawAC[x];
+      V_AC[x] = VrawAC[x];
     
       // Curvas de calibração
       if (x == 0){
