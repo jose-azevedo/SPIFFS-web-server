@@ -30,8 +30,8 @@ StaticJsonDocument<650> jsonConfig;
 
 AsyncWebServer server(HTTP_PORT);
 
-IPAddress staticIP(192, 168, 15, 47);
-IPAddress gateway(192, 168, 15, 1);
+IPAddress staticIP(192, 168, 0, 47);
+IPAddress gateway(192, 168, 0, 1);
 IPAddress subnet(255, 255, 255, 0);
 IPAddress dns1(8, 8, 8, 8);
 IPAddress dns2(8, 8, 4, 4);
@@ -63,8 +63,7 @@ void formatData(String* data) {
   rawValues.replace(";","\",\"");
   rawValues.replace("\n","\"],[\"");
   rawValues = "{\"values\":[[\"" + rawValues + "\"]]}";
-
-  StaticJsonDocument<600> parsedValues;
+  StaticJsonDocument<1000> parsedValues;
   deserializeJson(parsedValues, rawValues);
   int numberOfRows = parsedValues["values"].size();
 
@@ -81,17 +80,18 @@ void formatData(String* data) {
     *data = "[[" + timeStamp + values + "]]";
   } else {
     String HeaderAndTime = *data;
-    HeaderAndTime = HeaderAndTime.substring(0, 69);
+    HeaderAndTime = HeaderAndTime.substring(0, 137);
     HeaderAndTime.replace(";","\",\"");
     HeaderAndTime.replace("\n","\"],[\"");
     HeaderAndTime = "\"" + HeaderAndTime + "\"";
 
     String values = *data;
-    values = values.substring(69);
+    values = values.substring(137);
     values.replace(",",".");
     values.replace(";",",");
 
     *data = "[[" + HeaderAndTime + values + "]]";
+    Serial.println(*data);
   }
 }
 /*
