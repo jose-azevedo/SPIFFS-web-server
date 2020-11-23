@@ -262,7 +262,7 @@ void createFile(){
     break;
   }
 
-  const String header = "Hora;I DC;I DC rms;V DC;V DC rms;P DC;I AC rms;V AC rms;S;FP";
+  const String header = "Hora;I DC;I DC rms;V DC;V DC rms;P DC;I AC rms;V AC rms;P AC;FP";
   
   // Cabeçalho do arquivo
   if(SD.mkdir(directory)){
@@ -295,7 +295,7 @@ void createFile(){
 */
 void storeData(){
 
-  String fileData = String(rtc.getTimeStr()) + ";" + String(acc[i].I_DCavg/counter) + ";" + String(acc[i].I_DCrms/counter) + ";" + String(acc[i].V_DCavg/counter) + ";" + String(acc[i].V_DCrms/counter) + ";" + String(acc[i].P_DC/counter) + ";" + String(acc[i].I_ACrms/counter) + ";" + String(acc[i].V_ACrms/counter) + ";" + String(acc[i].S/counter) + ";" + String(acc[i].FP/counter);
+  String fileData = String(rtc.getTimeStr()) + ";" + String(acc[i].I_DCavg/counter) + ";" + String(acc[i].I_DCrms/counter) + ";" + String(acc[i].V_DCavg/counter) + ";" + String(acc[i].V_DCrms/counter) + ";" + String(acc[i].P_DC/counter) + ";" + String(acc[i].I_ACrms/counter) + ";" + String(acc[i].V_ACrms/counter) + ";" + String(acc[i].P_AC/counter) + ";" + String(acc[i].FP/counter);
   fileData.replace(".",",");
   
   data = SD.open(filePath, FILE_WRITE);
@@ -480,17 +480,11 @@ void loop() {
       P_DC[x] = I_DC[x].rms*V_DC[x].rms;
     
       digitalWrite(LED_BUILTIN, LOW); // Acionamento do LED embutido para aferir o bom funcionamento do programa
-      Serial.println("I DC ; I DC rms ; V DC ; V DC rms ; P DC");
-      Serial.print(I_DC[x].avg);
+      if(x == 0) Serial.println("I DC 1 ; V DC 1      I DC 2 ; V DC 2      I AC 1 ; V AC 1      I AC 2 ; V AC 2");
+      Serial.print(I_DC[x].avg, 4);
       Serial.print(" ; ");
-      Serial.print(I_DC[x].rms);
-      Serial.print(" ; ");
-      Serial.print(V_DC[x].avg);
-      Serial.print(" ; ");
-      Serial.print(V_DC[x].rms);
-      Serial.print(" ; ");
-      Serial.print(P_DC[x]);
-      Serial.println("\n----------------------------------------------------------------\n");
+      Serial.print(V_DC[x].avg, 4);
+      Serial.print("      ");
       nextStep();
       iterations = 0;
     }
@@ -580,15 +574,11 @@ void loop() {
       S[x] = I_AC[x].rms*V_AC[x].rms;
       P_AC[x] = S[x]*FP[x];
 
-      Serial.println("I AC rms ; V AC rms ; S ; FP");
-      Serial.print(I_AC[x].rms);
+      Serial.print(I_AC[x].rms, 4);
       Serial.print(" ; ");
-      Serial.print(V_AC[x].rms);
-      Serial.print(" ; ");
-      Serial.print(S[x]);
-      Serial.print(" ; ");
-      Serial.print(FP[x]);
-      Serial.println("\n----------------------------------------------------------------\n");
+      Serial.print(V_AC[x].rms, 4);
+      if (x == 0) Serial.print("      ");
+      else Serial.println("\n------------------------------------------------------------------------------\n");
       nextStep();
       iterations = 0;
     }
