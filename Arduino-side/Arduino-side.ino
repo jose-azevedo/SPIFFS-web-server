@@ -281,7 +281,7 @@ void createFile(){
     break;
   }
 
-  const String header = "Hora;Transdutor I DC;Transdutor V DC;Transdutor I AC;Transdutor V AC rms;I DC;I DC rms;V DC;V DC rms;P DC;I AC rms;V AC rms;S;FP";
+  const String header = "Hora;Transdutor I DC;Transdutor V DC;Transdutor I AC;Transdutor V AC rms;I DC;I DC rms;V DC;V DC rms;P DC;I AC rms;V AC rms;P AC;FP";
   
   // Cabeçalho do arquivo
   if(SD.mkdir(directory)){
@@ -316,7 +316,7 @@ void storeData(){
 
   String fileData = String(rtc.getTimeStr()) + ";" + String(acc_raw[i].I_DCavg/counter) + ";" + String(acc_raw[i].V_DCavg/counter) + ";" + String(acc_raw[i].I_ACrms/counter) + ";" + String(acc_raw[i].V_ACrms/counter);
   
-  fileData = fileData + ";" + String(acc[i].I_DCavg/counter) + ";" + String(acc[i].I_DCrms/counter) + ";" + String(acc[i].V_DCavg/counter) + ";" + String(acc[i].V_DCrms/counter) + ";" + String(acc[i].P_DC/counter) + ";" + String(acc[i].I_ACrms/counter) + ";" + String(acc[i].V_ACrms/counter) + ";" + String(acc[i].S/counter) + ";" + String(acc[i].FP/counter);
+  fileData = fileData + ";" + String(acc[i].I_DCavg/counter) + ";" + String(acc[i].I_DCrms/counter) + ";" + String(acc[i].V_DCavg/counter) + ";" + String(acc[i].V_DCrms/counter) + ";" + String(acc[i].P_DC/counter) + ";" + String(acc[i].I_ACrms/counter) + ";" + String(acc[i].V_ACrms/counter) + ";" + String(acc[i].P_AC/counter) + ";" + String(acc[i].FP/counter);
   
   fileData.replace(".",",");
   

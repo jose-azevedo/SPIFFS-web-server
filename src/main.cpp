@@ -80,13 +80,13 @@ void formatData(String* data) {
     *data = "[[" + timeStamp + values + "]]";
   } else {
     String HeaderAndTime = *data;
-    HeaderAndTime = HeaderAndTime.substring(0, 137);
+    HeaderAndTime = HeaderAndTime.substring(0, 140);
     HeaderAndTime.replace(";","\",\"");
     HeaderAndTime.replace("\n","\"],[\"");
     HeaderAndTime = "\"" + HeaderAndTime + "\"";
 
     String values = *data;
-    values = values.substring(137);
+    values = values.substring(140);
     values.replace(",",".");
     values.replace(";",",");
 
