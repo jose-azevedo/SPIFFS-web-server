@@ -441,14 +441,14 @@ void loop() {
     
       if (x == 0){
         // Corrente DC 1
-        if (I_DC[x].avg <= 3.574){
-          calibrate(&I_DC[x].avg, 8.3227, -27.149);   //Curva para correntes abaixo de 1A
-          calibrate(&I_DC[x].rms, 8.3227, -27.149);   
+        if (I_DC[x].avg <= 3.46){
+          calibrate(&I_DC[x].avg, 9.6814, -32.426);   //Curva para correntes abaixo de 1A
+          calibrate(&I_DC[x].rms, 9.6814, -32.426);   
         }
         else{
           
-          calibrate(&I_DC[x].avg, 9.5957, -31.581);   //Curva para correntes acima de 1A
-          calibrate(&I_DC[x].rms, 9.5957, -31.581);  
+          calibrate(&I_DC[x].avg, 9.6473, -32.275);   //Curva para correntes acima de 1A
+          calibrate(&I_DC[x].rms, 9.6473, -32.275);  
         }
       
         // Tensão DC 1
@@ -458,13 +458,13 @@ void loop() {
     
       if (x == 1){
         // Corrente DC 2
-        if (I_DC[x].avg <= 3.574){
-          calibrate(&I_DC[x].avg, 9.7144, -31.769);    //Curva para correntes abaixo de 1A
-          calibrate(&I_DC[x].rms, 9.7144, -31.769);
+        if (I_DC[x].avg <= 3.42){
+          calibrate(&I_DC[x].avg, 8.8859, -29.45);    //Curva para correntes abaixo de 1A
+          calibrate(&I_DC[x].rms, 8.8859, -29.45);
         }
         else{
-          calibrate(&I_DC[x].avg, 9.5777, -31.31);    //Curva para correntes acima de 1A
-          calibrate(&I_DC[x].rms, 9.5777, -31.31);
+          calibrate(&I_DC[x].avg, 9.7408, -32.354);    //Curva para correntes acima de 1A
+          calibrate(&I_DC[x].rms, 9.7408, -32.354);
         }
       
         // Tensão DC 2
@@ -538,11 +538,11 @@ void loop() {
       // Curvas de calibração
       if (x == 0){
         // Corrente AC 1
-        if (I_AC[x].rms <= 0.076) {
-          calibrate(&I_AC[x].rms, 13.116, -0.0161);              //Curva para correntes abaixo de 1A
+        if (I_AC[x].rms <= 0.078) {
+          calibrate(&I_AC[x].rms, 15.752, -0.2446);              //Curva para correntes abaixo de 1A
         }
         else {
-          calibrate(&I_AC[x].rms, 13.556, -0.0279);              //Curva para correntes acima de 1A
+          calibrate(&I_AC[x].rms, 12.561, 0.0012);              //Curva para correntes acima de 1A
         }
         
         // Tensão AC 1
@@ -552,14 +552,24 @@ void loop() {
       if (x == 1){
         // Corrente AC 2
         if (I_AC[x].rms <= 0.079) { 
-          calibrate(&I_AC[x].rms, 13.189, -0.0182);         //Curva para correntes abaixo de 1A    
+          calibrate(&I_AC[x].rms, 15.609, -0.1904);         //Curva para correntes abaixo de 1A    
         }
         else {
-          calibrate(&I_AC[x].rms, 13.621301, -0.032166);    //Curva para correntes acima de 1A
+          calibrate(&I_AC[x].rms, 12.809, 0.009);           //Curva para correntes acima de 1A
         }
       
         // Tensão AC 2
         calibrate(&V_AC[x].rms, 154.080718, -29.486292);
+      }
+
+      if (I_AC[x].avg < 0 || I_AC[x].avg < 0) {             // Condição para não haver correntes negativas
+          I_AC[x].avg = 0;
+          I_AC[x].rms = 0;
+      }
+
+      if (I_DC[x].avg == 0) {                               // Condição para zerar a corrente no lado AC caso não haja corrente no lado DC
+          I_AC[x].avg = 0;
+          I_AC[x].rms = 0;
       }
       
       // Condição para não se ter valores irreais quando não houver tensão
@@ -589,27 +599,7 @@ void loop() {
   if (step=='S') {
     cli();
     accumulate();
-    clearAverageVariables();
-//    Serial.println("I DC ; I DC rms ; V DC ; V DC rms ; P DC ; I AC rms ; V AC rms ; S ; FP");
-//    Serial.print(acc[x].I_DCavg);
-//    Serial.print(" ; ");
-//    Serial.print(acc[x].I_DCrms);
-//    Serial.print(" ; ");
-//    Serial.print(acc[x].V_DCavg);
-//    Serial.print(" ; ");
-//    Serial.print(acc[x].V_DCrms);
-//    Serial.print(" ; ");
-//    Serial.print(acc[x].P_DC);
-//    Serial.print(" ; ");
-//    Serial.print(acc[x].I_ACrms);
-//    Serial.print(" ; ");
-//    Serial.print(acc[x].V_ACrms);
-//    Serial.print(" ; ");
-//    Serial.print(acc[x].S
-//    Serial.print(" ; ");
-//    Serial.print(acc[x].FP);
-//    Serial.println("\n----------------------------------------------------------------\n");
-    
+    clearAverageVariables();    
     
     tempo = rtc.getTime();                                                        // Variável recebedora da informação de tempo
     if (tempo.min > timeToSaveA) timeToSaveA = (tempo.min/interval + 1)*interval; // Os dados só são salvos em minutos múltiplos de 5
