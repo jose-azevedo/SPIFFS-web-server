@@ -411,9 +411,11 @@ void setup(){
   WiFi.begin(ssid, password);
 
 // Espera até que a rede esteja conectada
-  while(WiFi.status()!=WL_CONNECTED) {
+  int connectionAttempts = 0;
+  while(WiFi.status() != WL_CONNECTED && connectionAttempts <= MAXIMUM_ATTEMPTS+2) {
     Serial.print(".");
-    delay(500);
+    delay(1000);
+    connectionAttempts++;
   }
 
   if(!MDNS.begin("monitoramento-m2")) {
