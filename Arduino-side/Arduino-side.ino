@@ -540,7 +540,7 @@ void loop() {
     a partir da variável x, alterada pela função nextStep() ao fim do laço.
   */
   if (sample>=N && step=='A') {
-    cli();
+    cli();    
     
     IrawAC[x].avg = getAverageValue(I);
     VrawAC[x].avg = getAverageValue(V);
@@ -575,12 +575,7 @@ void loop() {
       // Curvas de calibração
       if (x == 0){
         // Corrente AC 1
-        if (I_AC[x].rms <= 0.078) {
-          calibrate(&I_AC[x].rms, 15.752, -0.2446);              //Curva para correntes abaixo de 1A
-        }
-        else {
-          calibrate(&I_AC[x].rms, 12.561, 0.0012);              //Curva para correntes acima de 1A
-        }
+        calibrate(&I_AC[x].rms, 2.2488, -0.0203);
         
         // Tensão AC 1
         calibrate(&V_AC[x].rms, 154.74, -24.544);
@@ -588,13 +583,8 @@ void loop() {
     
       if (x == 1){
         // Corrente AC 2
-        if (I_AC[x].rms <= 0.079) { 
-          calibrate(&I_AC[x].rms, 15.609, -0.1904);         //Curva para correntes abaixo de 1A    
-        }
-        else {
-          calibrate(&I_AC[x].rms, 12.809, 0.009);           //Curva para correntes acima de 1A
-        }
-      
+        calibrate(&I_AC[x].rms, 2.2468, -0.0166);
+          
         // Tensão AC 2
         calibrate(&V_AC[x].rms, 154.080718, -29.486292);
       }
@@ -604,10 +594,10 @@ void loop() {
           I_AC[x].rms = 0;
       }
 
-      if (I_DC[x].avg == 0) {                               // Condição para zerar a corrente no lado AC caso não haja corrente no lado DC
-          I_AC[x].avg = 0;
-          I_AC[x].rms = 0;
-      }
+//      if (I_DC[x].avg == 0) {                               // Condição para zerar a corrente no lado AC caso não haja corrente no lado DC
+//          I_AC[x].avg = 0;
+//          I_AC[x].rms = 0;
+//      }
       
       // Condição para não se ter valores irreais quando não houver tensão
       if (V_AC[x].rms < 180) V_AC[x].rms = 0; 
