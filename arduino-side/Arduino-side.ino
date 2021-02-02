@@ -497,7 +497,7 @@ void loop() {
     
       if (x == 1){
         // Corrente DC 2
-        if (I_DC[x].avg <= 0.68){
+        if (I_DC[x].avg <= 3.42){
           calibrate(&I_DC[x].avg, 2.2648, -0.5329);    //Curva para correntes abaixo de 1A
           calibrate(&I_DC[x].rms, 2.2648, -0.5329);
         } else {
@@ -516,10 +516,6 @@ void loop() {
       }
       
       P_DC[x] = I_DC[x].rms*V_DC[x].rms;
-
-      if (P_DC[x] < 0) {
-        P_DC[x] = 0;
-      }
     
       digitalWrite(LED_BUILTIN, LOW); // Acionamento do LED embutido para aferir o bom funcionamento do programa
       if(x == 0) Serial.println("I DC 1 ; V DC 1      I DC 2 ; V DC 2      I AC 1 ; V AC 1      I AC 2 ; V AC 2");
@@ -595,10 +591,10 @@ void loop() {
           I_AC[x].rms = 0;
       }
 
-     if (I_DC[x].avg == 0) {                               // Condição para zerar a corrente no lado AC caso não haja corrente no lado DC
-         I_AC[x].avg = 0;
-         I_AC[x].rms = 0;
-     }
+//      if (I_DC[x].avg == 0) {                               // Condição para zerar a corrente no lado AC caso não haja corrente no lado DC
+//          I_AC[x].avg = 0;
+//          I_AC[x].rms = 0;
+//      }
       
       // Condição para não se ter valores irreais quando não houver tensão
       if (V_AC[x].rms < 180) V_AC[x].rms = 0; 
@@ -607,10 +603,6 @@ void loop() {
       FP[x] /= M;
       S[x] = I_AC[x].rms*V_AC[x].rms;
       P_AC[x] = S[x]*FP[x];
-
-      if (P_AC[x] < 0) {
-        P_AC[x] = 0;
-      }
 
       Serial.print(I_AC[x].rms, 4);
       Serial.print(" ; ");
