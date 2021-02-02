@@ -441,43 +441,44 @@ void loop() {
     
       if (x == 0){
         // Corrente DC 1
-        if (I_DC[x].avg <= 3.46){
-          calibrate(&I_DC[x].avg, 9.6814, -32.426);   //Curva para correntes abaixo de 1A
-          calibrate(&I_DC[x].rms, 9.6814, -32.426);   
-        }
-        else{
-          
-          calibrate(&I_DC[x].avg, 9.6473, -32.275);   //Curva para correntes acima de 1A
-          calibrate(&I_DC[x].rms, 9.6473, -32.275);  
+        if (I_DC[x].avg <= 0.62){
+          calibrate(&I_DC[x].avg, 2.2035, -0.3637);   //Curva para correntes abaixo de 1A
+          calibrate(&I_DC[x].rms, 2.2035, -0.3637);   
+        } else {
+          calibrate(&I_DC[x].avg, 2.176, -0.3514);   //Curva para correntes acima de 1A
+          calibrate(&I_DC[x].rms, 2.176, -0.3514);
         }
       
         // Tensão DC 1
-        calibrate(&V_DC[x].avg, 8.226, 1.0816);
-        calibrate(&V_DC[x].rms, 8.226, 1.0816);
+        calibrate(&V_DC[x].avg, 8.73, 1.5027);
+        calibrate(&V_DC[x].rms, 8.73, 1.5027);
       }
     
       if (x == 1){
         // Corrente DC 2
-        if (I_DC[x].avg <= 3.42){
-          calibrate(&I_DC[x].avg, 8.8859, -29.45);    //Curva para correntes abaixo de 1A
-          calibrate(&I_DC[x].rms, 8.8859, -29.45);
-        }
-        else{
-          calibrate(&I_DC[x].avg, 9.7408, -32.354);    //Curva para correntes acima de 1A
-          calibrate(&I_DC[x].rms, 9.7408, -32.354);
+        if (I_DC[x].avg <= 0.68){
+          calibrate(&I_DC[x].avg, 2.2648, -0.5329);    //Curva para correntes abaixo de 1A
+          calibrate(&I_DC[x].rms, 2.2648, -0.5329);
+        } else {
+          calibrate(&I_DC[x].avg, 2.2294, -0.5155);   //Curva para correntes acima de 1A
+          calibrate(&I_DC[x].rms, 2.2294, -0.5155);
         }
       
         // Tensão DC 2
-        calibrate(&V_DC[x].avg, 8.3735, 1.1027);
-        calibrate(&V_DC[x].rms, 8.3735, 1.1027);
+        calibrate(&V_DC[x].avg, 8.5996, 1.3735);
+        calibrate(&V_DC[x].rms, 8.5996, 1.3735);
       }
 
-      if (I_DC[x].avg < 0 || I_DC[x].avg < 0) {
+      if (I_DC[x].avg < 0 || I_DC[x].avg < 0 || V_DC[x].avg < 12) {
           I_DC[x].avg = 0;
           I_DC[x].rms = 0;
       }
       
       P_DC[x] = I_DC[x].rms*V_DC[x].rms;
+
+      if (P_DC[x] < 0) {
+        P_DC[x] = 0;
+      }
     
       digitalWrite(LED_BUILTIN, LOW); // Acionamento do LED embutido para aferir o bom funcionamento do programa
       if(x == 0) Serial.println("I DC 1 ; V DC 1      I DC 2 ; V DC 2      I AC 1 ; V AC 1      I AC 2 ; V AC 2");
@@ -529,31 +530,21 @@ void loop() {
       I_AC[x].rms = I_AC[x].avg_rms/M;
       V_AC[x].rms = V_AC[x].avg_rms/M;
     
-      // Curvas de calibração
+     // Curvas de calibração
       if (x == 0){
         // Corrente AC 1
-        if (I_AC[x].rms <= 0.078) {
-          calibrate(&I_AC[x].rms, 15.752, -0.2446);              //Curva para correntes abaixo de 1A
-        }
-        else {
-          calibrate(&I_AC[x].rms, 12.561, 0.0012);              //Curva para correntes acima de 1A
-        }
+        calibrate(&I_AC[x].rms, 0.9898, -0.0278);
         
         // Tensão AC 1
-        calibrate(&V_AC[x].rms, 154.74, -24.544);
+        calibrate(&V_AC[x].rms, 137.01, -2.901);
       }
     
       if (x == 1){
         // Corrente AC 2
-        if (I_AC[x].rms <= 0.079) { 
-          calibrate(&I_AC[x].rms, 15.609, -0.1904);         //Curva para correntes abaixo de 1A    
-        }
-        else {
-          calibrate(&I_AC[x].rms, 12.809, 0.009);           //Curva para correntes acima de 1A
-        }
-      
+        calibrate(&I_AC[x].rms, 1.0164, -0.0129);
+          
         // Tensão AC 2
-        calibrate(&V_AC[x].rms, 154.080718, -29.486292);
+        calibrate(&V_AC[x].rms, 140.4, -9.0167);
       }
 
       if (I_AC[x].avg < 0 || I_AC[x].avg < 0) {             // Condição para não haver correntes negativas
@@ -573,6 +564,10 @@ void loop() {
       FP[x] /= M;
       S[x] = I_AC[x].rms*V_AC[x].rms;
       P_AC[x] = S[x]*FP[x];
+
+      if (P_AC[x] < 0) {
+        P_AC[x] = 0;
+      }
 
       Serial.print(I_AC[x].rms, 4);
       Serial.print(" ; ");
