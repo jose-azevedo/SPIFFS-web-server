@@ -572,7 +572,7 @@ void loop() {
       // Curvas de calibração
       if (x == 0){
         // Corrente AC 1
-        calibrate(&I_AC[x].rms, 0.9898, -0.0278);
+        calibrate(&I_AC[x].rms, 0.9933, -0.0094);
         
         // Tensão AC 1
         calibrate(&V_AC[x].rms, 137.01, -2.901);
@@ -580,7 +580,7 @@ void loop() {
     
       if (x == 1){
         // Corrente AC 2
-        calibrate(&I_AC[x].rms, 1.0164, -0.0129);
+        calibrate(&I_AC[x].rms, 1.0236, -0.0128);
           
         // Tensão AC 2
         calibrate(&V_AC[x].rms, 140.4, -9.0167);
